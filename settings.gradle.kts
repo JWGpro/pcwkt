@@ -1,4 +1,4 @@
-include(listOf("desktop", "android", "ios", "core"))
+include(listOf("desktop", "android", "ios", "core", "api", "plugins", "plugins:classic"))
 
 // TODO: Why can't you just put `val kotlinVersion = "thing"` here?
 

@@ -34,9 +34,13 @@ sourceSets {
 
 val mainClassName = "com.pcwkt.game.DesktopLauncher"
 val assetsDir = File("../assets")
+val pluginsDir: File by rootProject.extra
 
 tasks.register<JavaExec>("run") {
     dependsOn(tasks["classes"])
+
+    // For development
+    systemProperty("pf4j.pluginsDir", pluginsDir.absolutePath)
 
     main = mainClassName
     classpath = java.sourceSets["main"].runtimeClasspath
@@ -74,6 +78,28 @@ tasks.register<Jar>("dist") {
     with(tasks.jar.get() as CopySpec)
 }
 tasks["dist"].dependsOn(tasks["classes"])
+
+tasks.register<Jar>("uberJar") {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn(tasks.named("compileKotlin"))
+    archiveClassifier.set("uber")
+
+    from(sourceSets.main.get().output)
+
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
+    manifest {
+        attributes["Main-Class"] = mainClassName
+    }
+
+    archiveBaseName.set("${project.name}-plugin-demo")
+}
+
+tasks.named("build") {
+    dependsOn("uberJar")
+}
 
 eclipse {
     project {

@@ -1,3 +1,14 @@
+plugins {
+    idea
+}
+
+idea {
+    module {
+        isDownloadJavadoc = true
+        isDownloadSources = true
+    }
+}
+
 buildscript {
     val kotlinVersion: String by extra
 
@@ -10,6 +21,8 @@ buildscript {
         set("ashleyVersion", "1.7.4")
         set("aiVersion", "1.8.2")
         set("gdxControllersVersion", "2.2.1")
+        set("pf4jVersion", "3.8.0")
+        set("pluginsDir", file("$buildDir/plugins"))
     }
 
     repositories {
