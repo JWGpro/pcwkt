@@ -1,12 +1,17 @@
 package com.pcwkt.game
 
 import com.badlogic.gdx.ApplicationAdapter
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.ScreenUtils
 import com.example.api.GameMode
-import org.pf4j.*
+import org.pf4j.CompoundPluginDescriptorFinder
+import org.pf4j.DefaultPluginManager
+import org.pf4j.ManifestPluginDescriptorFinder
+import org.pf4j.PluginWrapper
 import java.nio.file.Path
+import kotlin.io.path.Path
 
 class PCWKTGame : ApplicationAdapter() {
     private lateinit var batch: SpriteBatch
@@ -23,12 +28,13 @@ class PCWKTGame : ApplicationAdapter() {
         batch = SpriteBatch()
         img = Texture("badlogic.jpg")
 
-        val defaultPluginsDir = "${System.getProperty("user.home")}/pcwkt/plugins"
-        val pluginsDir = System.getProperty("pf4j.pluginsDir", defaultPluginsDir)
+        val defaultPluginsDir = Gdx.files.external("pcwkt/plugins").file().absolutePath
+        val pluginsDir = defaultPluginsDir
+//        val pluginsDir = System.getProperty("pf4j.pluginsDir", defaultPluginsDir)
         println("plugins dir: $pluginsDir")
 
         // create the plugin manager
-        val pluginManager = PluginManager(listOf(Path.of(pluginsDir)))
+        val pluginManager = PluginManager(listOf(Path(pluginsDir)))
         // load the plugins
         pluginManager.loadPlugins()
         // start (active/resolved) the plugins

@@ -3,11 +3,12 @@ plugins {
 }
 
 dependencies {
-    val pf4jVersion: String by rootProject.extra
+//    val pf4jVersion: String by rootProject.extra
+    val pf4jDir: String by rootProject.extra
 
     compileOnly(project(":api"))
     compileOnly(kotlin("stdlib"))
 
-    compileOnly("org.pf4j:pf4j:${pf4jVersion}")
-    kapt("org.pf4j:pf4j:${pf4jVersion}")
+    compileOnly(files(pf4jDir)) // TODO: here
+    kapt(files(pf4jDir))
 }

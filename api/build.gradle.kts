@@ -3,10 +3,11 @@ plugins {
 }
 
 dependencies {
-    val pf4jVersion: String by rootProject.extra
+//    val pf4jVersion: String by rootProject.extra
+    val pf4jDir: String by rootProject.extra
     val gdxVersion: String by rootProject.extra
 
     implementation(kotlin("stdlib"))
-    compileOnly("org.pf4j:pf4j:${pf4jVersion}")
+    compileOnly(files(pf4jDir)) // TODO: here
     api("com.badlogicgames.gdx:gdx:$gdxVersion")
 }

@@ -21,7 +21,8 @@ buildscript {
         set("ashleyVersion", "1.7.4")
         set("aiVersion", "1.8.2")
         set("gdxControllersVersion", "2.2.1")
-        set("pf4jVersion", "3.8.0")
+//        set("pf4jVersion", "3.8.0")
+        set("pf4jDir", "$projectDir/libs/pf4j-3.9.0-SNAPSHOT.jar")
         set("pluginsDir", file("$buildDir/plugins"))
     }
 
@@ -53,5 +54,8 @@ allprojects {
         maven("https://oss.sonatype.org/content/repositories/snapshots/")
         maven("https://oss.sonatype.org/content/repositories/releases/")
         maven("https://jitpack.io")
+//        flatDir {
+//            dirs(listOf("libs"))
+//        }
     }
 }
