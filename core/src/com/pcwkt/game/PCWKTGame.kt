@@ -5,7 +5,10 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.ScreenUtils
 import com.example.api.GameMode
-import org.pf4j.*
+import org.pf4j.CompoundPluginDescriptorFinder
+import org.pf4j.DefaultPluginManager
+import org.pf4j.ManifestPluginDescriptorFinder
+import org.pf4j.PluginWrapper
 import java.nio.file.Path
 
 class PCWKTGame : ApplicationAdapter() {
@@ -15,7 +18,7 @@ class PCWKTGame : ApplicationAdapter() {
     private class PluginManager(importPaths: List<Path>) : DefaultPluginManager(importPaths) {
         override fun createPluginDescriptorFinder(): CompoundPluginDescriptorFinder {
             return CompoundPluginDescriptorFinder()
-                .add(ManifestPluginDescriptorFinder());
+                .add(ManifestPluginDescriptorFinder())
         }
     }
 
