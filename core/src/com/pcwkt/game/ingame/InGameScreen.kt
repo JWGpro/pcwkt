@@ -74,6 +74,8 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
         )
         // TODO: Some kind of error message if no modes
         gameMode = gameModes.firstOrNull()!!
+        // TODO: Is there a security concern in passing assetManager?
+        //  You can't reassign the resolver to an internal one, at least.
         gameMode.gameInit(
             gameStage,
             assetManager

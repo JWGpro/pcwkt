@@ -28,6 +28,8 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
         override fun gameInit(gameStage: Stage, assetManager: AssetManager) {
             println("Classic mode gameInit")
 
+            Assets.loadAll(assetManager)
+
             actor.setPosition(0f, 0f)
             gameStage.addActor(actor)
         }
