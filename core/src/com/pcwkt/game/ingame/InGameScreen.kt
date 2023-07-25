@@ -6,13 +6,16 @@ import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.assets.AssetManager
-import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver
+import com.badlogic.gdx.assets.loaders.resolvers.ExternalFileHandleResolver
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.input.GestureDetector
 import com.badlogic.gdx.input.GestureDetector.GestureListener
+import com.badlogic.gdx.maps.tiled.TiledMap
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Stage
-import com.badlogic.gdx.utils.ScreenUtils
+import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.example.api.GameMode
 import org.pf4j.CompoundPluginDescriptorFinder
@@ -25,8 +28,13 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
     GestureListener {
 
     private val gameCamera = OrthographicCamera()
+    private val uiCamera = OrthographicCamera()
     private val gameStage = Stage(ScreenViewport(gameCamera))
-    private val assetManager = AssetManager(InternalFileHandleResolver())
+    private val uiStage =
+        Stage(FitViewport(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat(), uiCamera))
+    private val assetManager = AssetManager(ExternalFileHandleResolver())
+    private val tiledMap = TiledMap()
+    private val tiledMapRenderer = OrthogonalTiledMapRenderer(tiledMap)
 
     // An InputMultiplexer will pass input events to the first argument first and the last argument last.
     // The idea is that stuff on top (like UI) should receive it first.
@@ -44,7 +52,7 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
     init {
         Gdx.input.inputProcessor = im
 
-        val defaultPluginsDir = "${System.getProperty("user.home")}/pcwkt/plugins"
+        val defaultPluginsDir = "${System.getProperty("user.home")}/pcwkt/gamemodes"
         val pluginsDir = System.getProperty("pf4j.pluginsDir", defaultPluginsDir)
         println("plugins dir: $pluginsDir")
 
@@ -64,6 +72,7 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
                 GameMode::class.java.name
             )
         )
+        // TODO: Some kind of error message if no modes
         gameMode = gameModes.firstOrNull()!!
         gameMode.gameInit(
             gameStage,
@@ -83,15 +92,24 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
     }
 
     override fun render(delta: Float) {
-        ScreenUtils.clear(1f, 0f, 0f, 1f)
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+
         gameMode.gameLoop(delta)
 
         gameCamera.update()
+        tiledMapRenderer.setView(gameCamera)
+        tiledMapRenderer.render()
+
         gameStage.act(delta)
+        uiStage.act(delta)
+
         gameStage.draw()
+        uiStage.draw()
     }
 
     override fun resize(width: Int, height: Int) {
+        gameStage.viewport.update(width, height, false)
+        uiStage.viewport.update(width, height, false)
     }
 
     override fun pause() {
@@ -105,6 +123,9 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
 
     override fun dispose() {
         gameStage.dispose()
+        uiStage.dispose()
+        assetManager.dispose()
+        tiledMap.dispose()
     }
 
     // Input event handling
@@ -141,7 +162,7 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
         return gameMode.scrolled(amountX, amountY)
     }
 
-    // Touch gesture detector events below.
+    // Touch gesture detector events
 
     override fun touchDown(x: Float, y: Float, pointer: Int, button: Int): Boolean {
         println("PCWKT: this was a different touchDown event that took floats")
