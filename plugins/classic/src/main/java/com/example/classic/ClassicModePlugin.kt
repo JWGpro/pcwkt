@@ -3,6 +3,7 @@ package com.example.classic
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.example.api.GameMode
@@ -25,10 +26,11 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
         private val actor = MapActor(TextureRegion(Texture("badlogic.jpg")))
         private var toggle = false
 
-        override fun gameInit(gameStage: Stage, assetManager: AssetManager) {
+        override fun gameInit(gameStage: Stage, assetManager: AssetManager, tiledMap: TiledMap) {
             println("Classic mode gameInit")
 
             Assets.loadAll(assetManager)
+            MapManager(tiledMap)
 
             actor.setPosition(0f, 0f)
             gameStage.addActor(actor)

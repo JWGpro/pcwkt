@@ -17,7 +17,7 @@ enum class Assets {
         DEFAULT("skins/glassy/skin/glassy-ui.json");
 
         override fun load(assetManager: AssetManager) {
-            assetManager.load(this.path, Skin::class.java)
+            assetManager.load("pcwkt/$path", Skin::class.java)
         }
     }
 
@@ -29,7 +29,7 @@ enum class Assets {
         APC_RED("unit-assets/default/apc_red.png");
 
         override fun load(assetManager: AssetManager) {
-            assetManager.load(this.path, Texture::class.java)
+            assetManager.load("pcwkt/$path", Texture::class.java)
         }
     }
 
@@ -37,7 +37,7 @@ enum class Assets {
         ANIMS("ui-assets/default/anims/anims.atlas");
 
         override fun load(assetManager: AssetManager) {
-            assetManager.load(this.path, TextureAtlas::class.java)
+            assetManager.load("pcwkt/$path", TextureAtlas::class.java)
         }
     }
 
@@ -46,7 +46,7 @@ enum class Assets {
         DAMAGE("sfx/damage.ogg");
 
         override fun load(assetManager: AssetManager) {
-            assetManager.load(this.path, Sound::class.java)
+            assetManager.load("pcwkt/$path", Sound::class.java)
         }
     }
 
@@ -56,7 +56,7 @@ enum class Assets {
             Textures.values().forEach { x -> x.load(assetManager) }
             TextureAtlases.values().forEach { x -> x.load(assetManager) }
             Sounds.values().forEach { x -> x.load(assetManager) }
-            
+
             assetManager.finishLoading()
         }
     }

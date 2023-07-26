@@ -76,9 +76,13 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
         gameMode = gameModes.firstOrNull()!!
         // TODO: Is there a security concern in passing assetManager?
         //  You can't reassign the resolver to an internal one, at least.
+        //  (Yeah but an internal one is internal to HERE anyway, it's not the filesystem, duh.)
+        //  This is also a consideration when exposing libGDX as a dependency for plugins.
+        //  Well, they can import anything they want. It's up to us to restrict permissions.
         gameMode.gameInit(
             gameStage,
-            assetManager
+            assetManager,
+            tiledMap
         )
 
         // print extensions for each started plugin
