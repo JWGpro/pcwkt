@@ -1,13 +1,20 @@
 package com.example.api
 
 import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Stage
 import org.pf4j.ExtensionPoint
 
 interface GameMode : ExtensionPoint {
-    fun gameInit(gameStage: Stage, assetManager: AssetManager, tiledMap: TiledMap)
+    fun gameInit(
+        gameStage: Stage,
+        assetManager: AssetManager,
+        tiledMap: TiledMap,
+        gameCamera: OrthographicCamera
+    )
+
     fun gameLoop(deltaTime: Float)
 
     // Input

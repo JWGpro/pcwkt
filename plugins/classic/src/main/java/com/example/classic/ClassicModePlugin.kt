@@ -1,16 +1,15 @@
 package com.example.classic
 
 import com.badlogic.gdx.assets.AssetManager
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.example.api.GameMode
-import com.example.api.MapActor
 import org.pf4j.Extension
 import org.pf4j.Plugin
 import org.pf4j.PluginWrapper
+import kotlin.math.pow
 
 class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
     override fun start() {
@@ -23,23 +22,27 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
 
     @Extension
     class ClassicMode : GameMode {
-        private val actor = MapActor(TextureRegion(Texture("badlogic.jpg")))
-        private var toggle = false
+        private lateinit var gameCamera: OrthographicCamera
+        private var lastX = 0
+        private var lastY = 0
+        private lateinit var mapManager: MapManager
 
-        override fun gameInit(gameStage: Stage, assetManager: AssetManager, tiledMap: TiledMap) {
-            println("Classic mode gameInit")
+        override fun gameInit(
+            gameStage: Stage,
+            assetManager: AssetManager,
+            tiledMap: TiledMap,
+            gameCamera: OrthographicCamera
+        ) {
+            this.gameCamera = gameCamera
+            gameCamera.zoom = 0.5f
 
             Assets.loadAll(assetManager)
-            MapManager(tiledMap)
 
-            actor.setPosition(0f, 0f)
-            gameStage.addActor(actor)
+            val cursor = Cursor(gameStage, assetManager)
+            mapManager = MapManager(tiledMap, cursor)
         }
 
         override fun gameLoop(deltaTime: Float) {
-//            println("Classic mode gameLoop")
-            actor.alpha = if (toggle) 1.0f else 0.0f
-            toggle = !toggle
         }
 
         override fun keyDown(keycode: Int): Boolean {
@@ -58,7 +61,10 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
         }
 
         override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-            println("Classic mode touchDown")
+            // Set for panning; init pan.
+            lastX = screenX
+            lastY = screenY
+
             return true;
         }
 
@@ -73,18 +79,33 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
         }
 
         override fun touchDragged(screenX: Int, screenY: Int, pointer: Int): Boolean {
-            println("Classic mode touchDragged")
+            val deltaX = screenX - lastX
+            val deltaY = lastY - screenY
+            lastX = screenX
+            lastY = screenY
+
+            // It appears that you need to set a boolean to pan with MMB,
+            //  because there is no parameter for the button used to drag.
+            // That param is in touchUp and touchDown, so they can set that boolean.
+            gameCamera.translate(deltaX.toFloat(), deltaY.toFloat())
+
             return true;
         }
 
         override fun mouseMoved(screenX: Int, screenY: Int): Boolean {
-            println("Classic mode mouseMoved")
-            actor.setPosition(screenX.toFloat(), screenY.toFloat())
+            val offX = gameCamera.viewportWidth / 2
+            val offY = gameCamera.viewportHeight / 2
+
+            val adjustedX = gameCamera.position.x - ((offX - screenX) * gameCamera.zoom)
+            val adjustedY = gameCamera.position.y - ((screenY - offY) * gameCamera.zoom)
+
+            mapManager.updateCursor(adjustedX, adjustedY)
             return true;
         }
 
         override fun scrolled(amountX: Float, amountY: Float): Boolean {
-            println("Classic mode scrolled")
+            // TODO: InputMap
+            gameCamera.zoom *= (1.5f).pow(amountY)
             return true;
         }
 

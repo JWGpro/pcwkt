@@ -38,7 +38,7 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
 
     // An InputMultiplexer will pass input events to the first argument first and the last argument last.
     // The idea is that stuff on top (like UI) should receive it first.
-    private val im = InputMultiplexer(gameStage, this, GestureDetector(this))
+    private val im = InputMultiplexer(uiStage, gameStage, this, GestureDetector(this))
 
     private var gameMode: GameMode
 
@@ -82,7 +82,8 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
         gameMode.gameInit(
             gameStage,
             assetManager,
-            tiledMap
+            tiledMap,
+            gameCamera
         )
 
         // print extensions for each started plugin

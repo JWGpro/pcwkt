@@ -4,9 +4,10 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.Actor
 
-class MapActor(private val region: TextureRegion) : Actor() {
+// "Static" or non-animated
+class MapActorS(private val region: TextureRegion) : Actor() {
 
-    var alpha: Float = 1.0f
+    private var alpha = 1.0f
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         batch?.setColor(color.r, color.g, color.b, color.a * parentAlpha * alpha)
