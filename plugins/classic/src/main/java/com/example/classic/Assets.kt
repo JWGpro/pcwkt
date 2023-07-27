@@ -10,43 +10,45 @@ private interface Loadable {
     fun load(assetManager: AssetManager)
 }
 
+private const val EXT = "pcwkt"
+
 enum class Assets {
     ;
 
     enum class Skins(val path: String) : Loadable {
-        DEFAULT("skins/glassy/skin/glassy-ui.json");
+        DEFAULT("$EXT/skins/glassy/skin/glassy-ui.json");
 
         override fun load(assetManager: AssetManager) {
-            assetManager.load("pcwkt/$path", Skin::class.java)
+            assetManager.load(path, Skin::class.java)
         }
     }
 
     enum class Textures(val path: String) : Loadable {
-        INF_RED_1("unit-assets/default/inf_red_1.png"),
-        INF_RED_2("unit-assets/default/inf_red_2.png"),
-        INF_BLUE_1("unit-assets/default/inf_blue_1.png"),
-        INF_BLUE_2("unit-assets/default/inf_blue_2.png"),
-        APC_RED("unit-assets/default/apc_red.png");
+        INF_RED_1("$EXT/unit-assets/default/inf_red_1.png"),
+        INF_RED_2("$EXT/unit-assets/default/inf_red_2.png"),
+        INF_BLUE_1("$EXT/unit-assets/default/inf_blue_1.png"),
+        INF_BLUE_2("$EXT/unit-assets/default/inf_blue_2.png"),
+        APC_RED("$EXT/unit-assets/default/apc_red.png");
 
         override fun load(assetManager: AssetManager) {
-            assetManager.load("pcwkt/$path", Texture::class.java)
+            assetManager.load(path, Texture::class.java)
         }
     }
 
     enum class TextureAtlases(val path: String) : Loadable {
-        ANIMS("ui-assets/default/anims/anims.atlas");
+        ANIMS("$EXT/ui-assets/default/anims/anims.atlas");
 
         override fun load(assetManager: AssetManager) {
-            assetManager.load("pcwkt/$path", TextureAtlas::class.java)
+            assetManager.load(path, TextureAtlas::class.java)
         }
     }
 
     enum class Sounds(val path: String) : Loadable {
-        FIRE("sfx/fire.ogg"),
-        DAMAGE("sfx/damage.ogg");
+        FIRE("$EXT/sfx/fire.ogg"),
+        DAMAGE("$EXT/sfx/damage.ogg");
 
         override fun load(assetManager: AssetManager) {
-            assetManager.load("pcwkt/$path", Sound::class.java)
+            assetManager.load(path, Sound::class.java)
         }
     }
 

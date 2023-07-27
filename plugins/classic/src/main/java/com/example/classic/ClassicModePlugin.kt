@@ -39,7 +39,12 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
             Assets.loadAll(assetManager)
 
             val cursor = Cursor(gameStage, assetManager)
-            mapManager = MapManager(tiledMap, cursor)
+            mapManager = MapManager(gameStage, assetManager, tiledMap, cursor)
+
+            ServiceLocator.init(gameStage, assetManager, mapManager)
+
+            // Don't do this before ServiceLocator.init()
+            mapManager.loadMap()
         }
 
         override fun gameLoop(deltaTime: Float) {
@@ -74,7 +79,9 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
         }
 
         override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-            println("Classic mode touchUp")
+            // TODO: InputMap
+            mapManager.selectNext()
+
             return true;
         }
 
@@ -100,12 +107,14 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
             val adjustedY = gameCamera.position.y - ((screenY - offY) * gameCamera.zoom)
 
             mapManager.updateCursor(adjustedX, adjustedY)
+
             return true;
         }
 
         override fun scrolled(amountX: Float, amountY: Float): Boolean {
             // TODO: InputMap
             gameCamera.zoom *= (1.5f).pow(amountY)
+
             return true;
         }
 

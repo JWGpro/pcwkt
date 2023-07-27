@@ -7,9 +7,8 @@ import com.example.api.MapActorA
 
 class Cursor(gameStage: Stage, assetManager: AssetManager) {
     private val atlas = Assets.TextureAtlases.ANIMS
-    private val actor = MapActorA(
-        // TODO: Gotta do something about this pcwkt/ stuff
-        assetManager.get("pcwkt/${atlas.path}"),
+    val actor = MapActorA(
+        assetManager.get(atlas.path),
         "cursoridle",
         0.5f,
         Animation.PlayMode.LOOP
