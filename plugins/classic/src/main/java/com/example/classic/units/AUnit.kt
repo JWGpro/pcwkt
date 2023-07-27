@@ -30,7 +30,6 @@ abstract class AUnit(
         gameStage.addActor(actor)
 
         vector = mapManager.grid[x][y].vector
-        mapManager.grid[vector.x][vector.y].unit = this // TODO: argh
         // store in teamUnits
     }
 }

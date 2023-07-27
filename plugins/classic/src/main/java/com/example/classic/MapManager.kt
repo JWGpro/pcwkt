@@ -74,8 +74,7 @@ class MapManager(
         setTerrain(12, 7, Terrains.PLAIN)
         setTerrain(13, 7, Terrains.PLAIN)
 
-//        spawnInfantry(13, 7, Team.RED)
-        Infantry(13, 7, Team.RED)
+        placeUnit(Infantry(13, 7, Team.RED))
     }
 
     fun updateCursor(x: Float, y: Float) {
@@ -144,6 +143,11 @@ class MapManager(
         gridReference.unit?.run {
             displayRanges(this)
         }
+    }
+
+    private fun placeUnit(unit: AUnit) {
+        // When I did this in the AUnit init I was warned that I was leaking "this", which is fair.
+        grid[unit.vector.x][unit.vector.y].unit = unit
     }
 
 }
