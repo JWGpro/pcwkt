@@ -48,6 +48,7 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
         }
 
         override fun gameLoop(deltaTime: Float) {
+            // TODO: Consider inline functions for costly operations on each frame
         }
 
         override fun keyDown(keycode: Int): Boolean {

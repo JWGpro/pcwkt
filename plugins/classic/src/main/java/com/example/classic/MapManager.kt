@@ -9,6 +9,10 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer
 import com.badlogic.gdx.maps.tiled.TiledMapTileSet
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.example.api.AStar
+import com.example.api.CellVector
+import com.example.api.Util.clampMax
+import com.example.api.Util.clampMin
 import com.example.classic.units.AUnit
 import com.example.classic.units.Infantry
 import kotlin.math.floor
@@ -24,15 +28,23 @@ class MapManager(
     private val cursor: Cursor
 ) {
     class GridReference(
-        var vector: CellVector,
-        var unit: AUnit?,
-        var targets: Array<AUnit>?
-    )
+        vector: CellVector,
+        neighbours: MutableSet<AStar.Node>,
+        var unit: AUnit?
+    ) : AStar.Node(vector, neighbours, null)
 
     // TODO: These should come from the loaded map
     private val mapW = 30
     private val mapH = 20
-    val grid = Array(mapW) { Array(mapH) { GridReference(CellVector(0, 0), null, null) } }
+    val grid = Array(mapW) {
+        Array(mapH) {
+            GridReference(
+                CellVector(0, 0),
+                mutableSetOf(),
+                null
+            )
+        }
+    }
     private val terrainLayer = newMapLayer("terrain", mapW, mapH, CELL_SIZE)
     private val terrainSet = newTileSet("terrain")
     private val moveRangeLayer = newMapLayer("moveRange", mapW, mapH, CELL_SIZE)
@@ -55,6 +67,13 @@ class MapManager(
             for (y in 0 until mapH) {
                 grid[x][y].vector = CellVector(x, y)
                 setTerrain(x, y, Terrains.SEA)
+
+                // I don't know why it doesn't pick up the MutableSet that I declared.
+                val neighbours = grid[x][y].neighbours as MutableSet<AStar.Node>
+                neighbours.add(grid[x][clampMax(y + 1, mapH - 1)])
+                neighbours.add(grid[x][clampMin(y - 1, 0)])
+                neighbours.add(grid[clampMin(x - 1, 0)][y])
+                neighbours.add(grid[clampMax(x + 1, mapW - 1)][y])
             }
         }
     }

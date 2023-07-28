@@ -2,9 +2,9 @@ package com.example.classic.units
 
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.example.api.CellVector
 import com.example.api.MapActorS
 import com.example.classic.Assets
-import com.example.classic.CellVector
 import com.example.classic.ServiceLocator
 import com.example.classic.Team
 
