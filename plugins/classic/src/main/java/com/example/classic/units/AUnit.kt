@@ -5,15 +5,24 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.example.api.CellVector
 import com.example.api.MapActorS
 import com.example.classic.Assets
+import com.example.classic.MoveTypes
 import com.example.classic.ServiceLocator
 import com.example.classic.Team
+import kotlin.reflect.KClass
 
 // "Unit" was too close to the Kotlin inbuilt
 abstract class AUnit(
     x: Int,
     y: Int,
     var team: Team,
-    private val sprite: Assets.Textures
+    private val sprite: Assets.Textures,
+    val name: String,
+    val price: Int,
+    val moveRange: Int,
+    val moveType: MoveTypes,
+    val maxHP: Float = 100f,
+    val boardCap: Int = 0,
+    val boardable: Array<KClass<AUnit>>? = null
 ) {
     private val assetManager = ServiceLocator.assetManager
     private val mapManager = ServiceLocator.mapManager
@@ -23,6 +32,7 @@ abstract class AUnit(
         MapActorS(TextureRegion(assetManager.get<Texture>(sprite.path)))
 
     var vector: CellVector
+    var movesLeft = moveRange
 
     init {
         // TODO: UnitFactory?

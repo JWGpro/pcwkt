@@ -1,6 +1,5 @@
 package com.example.classic
 
-import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.assets.loaders.resolvers.ExternalFileHandleResolver
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
@@ -8,13 +7,13 @@ import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer
 import com.badlogic.gdx.maps.tiled.TiledMapTileSet
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile
-import com.badlogic.gdx.scenes.scene2d.Stage
 import com.example.api.AStar
 import com.example.api.CellVector
 import com.example.api.Util.clampMax
 import com.example.api.Util.clampMin
 import com.example.classic.units.AUnit
 import com.example.classic.units.Infantry
+import kotlin.math.abs
 import kotlin.math.floor
 
 private const val EXT = "pcwkt"
@@ -22,15 +21,14 @@ private const val CELL_SIZE = 16
 
 
 class MapManager(
-    private val gameStage: Stage,
-    private val assetManager: AssetManager,
     private val tiledMap: TiledMap,
     private val cursor: Cursor
 ) {
     class GridReference(
         vector: CellVector,
         neighbours: MutableSet<AStar.Node>,
-        var unit: AUnit?
+        var unit: AUnit?,
+        var terrain: Terrains
     ) : AStar.Node(vector, neighbours, null)
 
     // TODO: These should come from the loaded map
@@ -41,7 +39,8 @@ class MapManager(
             GridReference(
                 CellVector(0, 0),
                 mutableSetOf(),
-                null
+                null,
+                Terrains.SEA
             )
         }
     }
@@ -149,11 +148,72 @@ class MapManager(
     }
 
     private fun setTerrain(x: Int, y: Int, terrain: Terrains) {
+        grid[x][y].terrain = terrain
         terrainLayer.getCell(x, y).tile = terrainSet.getTile(terrain.ordinal)
     }
 
+    private fun manRange(start: CellVector, minRange: Int, maxRange: Int): Collection<CellVector> {
+        // Returns the Manhattan or Taxicab "circle" range from a starting point, clamping within
+        //  the map w/h, taking into account a minimum range. Assumes the origin is always 0,0.
+        // Used to get ranges, e.g. for movement and attack.
+
+        val vectors = mutableSetOf<CellVector>()
+
+        // Sets the initial x bounds to between +/- maxrange (clamped within the map).
+        val minX = clampMin(start.x - maxRange, 0)
+        val maxX = clampMax(start.x + maxRange, mapW - 1)
+        for (x in minX until maxX + 1) {
+            val dx = abs(start.x - x)
+            val yRange = maxRange - dx
+            // Sets the y bounds to whatever is left of the range after traversing x (again clamped
+            //  within the map).
+            val minY = clampMin(start.y - yRange, 0)
+            val maxY = clampMax(start.y + yRange, mapH - 1)
+            for (y in minY until maxY + 1) {
+                val dy = abs(start.y - y)
+                // Proceed if Manhattan distance >= minrange.
+                if (dx + dy >= minRange) {
+                    vectors.add(grid[x][y].vector)
+                }
+            }
+        }
+        return vectors
+    }
+
+    private fun setCosts(unit: AUnit) {
+        for (x in 0 until mapW) {
+            for (y in 0 until mapH) {
+                grid[x][y].cost = grid[x][y].terrain.moveCosts[unit.moveType]
+            }
+        }
+    }
+
     private fun displayRanges(unit: AUnit) {
-        // TODO:
+        val moveVectors = manRange(unit.vector, 0, unit.movesLeft)
+
+        moveVectors.forEach { vec ->
+            setCosts(unit)
+            val path = AStar.findPath(grid[unit.vector.x][unit.vector.y], grid[vec.x][vec.y])
+            // TODO: Incorporate movesLeft into AStar.findPath().
+            if (path != null && path.cost <= unit.movesLeft) {
+                val destination = grid[vec.x][vec.y]
+                val cell = moveRangeLayer.getCell(vec.x, vec.y)
+                // Destination conditions:
+                // 1: Cell is empty, or occupied by this unit.
+                if (destination.unit == null || destination.unit == unit) {
+                    // Set a movement range tile, store for later retrieval and clearance.
+                    cell.tile = rangesSet.getTile(RangeTiles.MOVE.ordinal)
+                    // TODO: rangetables.mdestinationcells[vec] = cell
+                }
+                // TODO:
+                //  2: Cell is occupied by a boardable unit.
+                // 3: Allow ONLY PASSAGE for units of the same or allied teams.
+                else if (destination.unit?.team == unit.team) { // TODO: or allies
+                    cell.tile = rangesSet.getTile(RangeTiles.SELECT.ordinal)
+                    // TODO: rangetables.mpassagecells[vec] = cell
+                }
+            }
+        }
     }
 
     // TODO: selectNext() belongs here for now. May listen to InputMap signal.

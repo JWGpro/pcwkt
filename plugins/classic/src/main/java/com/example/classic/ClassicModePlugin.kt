@@ -39,7 +39,7 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
             Assets.loadAll(assetManager)
 
             val cursor = Cursor(gameStage, assetManager)
-            mapManager = MapManager(gameStage, assetManager, tiledMap, cursor)
+            mapManager = MapManager(tiledMap, cursor)
 
             ServiceLocator.init(gameStage, assetManager, mapManager)
 

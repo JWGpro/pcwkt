@@ -1,6 +1,7 @@
 package com.example.api
 
 // TODO: Should this whole API be versioned in prod? How will I manage that?
+//  Should every class be open?
 object AStar {
 
     // TODO: I decided to set costs on all relevant Nodes immediately before AStar.route(),
@@ -76,6 +77,8 @@ object AStar {
         // Assumes the frontier will never be empty when this is called (or else throws)
         // Returns the CellVector with the lowest priority value (highest actual priority)
         val sorted = frontier.entries.sortedBy { it.value }
-        return sorted.first().key
+        val node = sorted.first().key
+        frontier.remove(node)
+        return node
     }
 }
