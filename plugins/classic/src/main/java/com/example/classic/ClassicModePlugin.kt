@@ -1,6 +1,5 @@
 package com.example.classic
 
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.maps.tiled.TiledMap
@@ -81,12 +80,7 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
         }
 
         override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-            // TODO: InputMap
-            when (button) {
-                Input.Buttons.LEFT -> mapManager.selectNext()
-                Input.Buttons.RIGHT -> mapManager.cancelLast()
-            }
-
+            InputHandler.tryBind(InputHandler.Binds.TOUCH_UP, button)
 
             return true;
         }

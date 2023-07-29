@@ -23,7 +23,7 @@ private const val CELL_SIZE = 16
 class MapManager(
     private val tiledMap: TiledMap,
     private val cursor: Cursor
-) {
+) : InputHandler.ControlObserver {
     class GridReference(
         vector: CellVector,
         neighbours: MutableSet<AStar.Node>,
@@ -74,6 +74,18 @@ class MapManager(
                 neighbours.add(grid[clampMin(x - 1, 0)][y])
                 neighbours.add(grid[clampMax(x + 1, mapW - 1)][y])
             }
+        }
+
+        InputHandler.registerObserver(this, Controls.SELECT_NEXT)
+        InputHandler.registerObserver(this, Controls.CANCEL_LAST)
+    }
+
+    override fun receive(control: Controls) {
+        // TODO: This whole "register/receive" disconnect feels like it could be joined up.
+        when (control) {
+            Controls.SELECT_NEXT -> selectNext()
+            Controls.CANCEL_LAST -> cancelLast()
+            else -> {}
         }
     }
 
