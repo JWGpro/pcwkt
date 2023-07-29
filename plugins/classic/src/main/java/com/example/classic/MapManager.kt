@@ -224,6 +224,20 @@ class MapManager(
         }
     }
 
+    fun cancelLast() {
+        // TODO: Almost everything
+        clearRanges()
+    }
+
+    private fun clearRanges() {
+        for (x in 0 until mapW) {
+            for (y in 0 until mapH) {
+                val cell = moveRangeLayer.getCell(x, y)
+                cell.tile = null
+            }
+        }
+    }
+
     private fun placeUnit(unit: AUnit) {
         // When I did this in the AUnit init I was warned that I was leaking "this", which is fair.
         grid[unit.vector.x][unit.vector.y].unit = unit
