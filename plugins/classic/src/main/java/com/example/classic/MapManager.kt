@@ -23,7 +23,7 @@ private const val CELL_SIZE = 16
 class MapManager(
     private val tiledMap: TiledMap,
     private val cursor: Cursor
-) : InputHandler.ControlObserver {
+) {
     class GridReference(
         vector: CellVector,
         neighbours: MutableSet<AStar.Node>,
@@ -76,17 +76,8 @@ class MapManager(
             }
         }
 
-        InputHandler.registerObserver(this, Controls.SELECT_NEXT)
-        InputHandler.registerObserver(this, Controls.CANCEL_LAST)
-    }
-
-    override fun receive(control: Controls) {
-        // TODO: This whole "register/receive" disconnect feels like it could be joined up.
-        when (control) {
-            Controls.SELECT_NEXT -> selectNext()
-            Controls.CANCEL_LAST -> cancelLast()
-            else -> {}
-        }
+        InputHandler.addListener(Controls.SELECT_NEXT) { selectNext() }
+        InputHandler.addListener(Controls.CANCEL_LAST) { cancelLast() }
     }
 
     fun loadMap() {
@@ -228,15 +219,14 @@ class MapManager(
         }
     }
 
-    // TODO: selectNext() belongs here for now. May listen to InputMap signal.
-    fun selectNext() {
+    private fun selectNext() {
         val gridReference = grid[short(cursor.actor.x)][short(cursor.actor.y)]
         gridReference.unit?.run {
             displayRanges(this)
         }
     }
 
-    fun cancelLast() {
+    private fun cancelLast() {
         // TODO: Almost everything
         clearRanges()
     }

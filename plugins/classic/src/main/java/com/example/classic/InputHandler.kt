@@ -7,11 +7,7 @@ const val SCROLL_DOWN = 1
 
 object InputHandler {
 
-    interface ControlObserver {
-        fun receive(control: Controls)
-    }
-
-    private val observers: Map<Controls, MutableList<ControlObserver>> =
+    private val listeners: Map<Controls, MutableList<() -> Unit>> =
         Controls.values().associateWith {
             mutableListOf()
         }
@@ -33,20 +29,20 @@ object InputHandler {
     }
 
     fun tryBind(inputType: Binds, inputId: Int) {
-        // Looks for a bound control, and notifies observers.
+        // Looks for a bound control, and calls listeners.
         val boundControl = inputType.map[inputId]
         boundControl?.run {
-            notifyObservers(boundControl)
+            callListeners(boundControl)
         }
     }
 
-    private fun notifyObservers(control: Controls) {
-        observers[control]?.forEach { observer ->
-            observer.receive(control)
+    private fun callListeners(control: Controls) {
+        listeners[control]?.forEach { listener ->
+            listener()
         }
     }
 
-    fun registerObserver(controlObserver: ControlObserver, control: Controls) {
-        observers[control]?.add(controlObserver)
+    fun addListener(control: Controls, listener: () -> Unit) {
+        listeners[control]?.add(listener)
     }
 }
