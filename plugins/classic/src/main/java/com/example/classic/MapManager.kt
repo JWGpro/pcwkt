@@ -11,6 +11,7 @@ import com.example.api.AStar
 import com.example.api.CellVector
 import com.example.api.Util.clampMax
 import com.example.api.Util.clampMin
+import com.example.classic.units.APC
 import com.example.classic.units.AUnit
 import com.example.classic.units.Infantry
 import kotlin.math.abs
@@ -96,6 +97,7 @@ class MapManager(
         setTerrain(13, 7, Terrains.PLAIN)
 
         placeUnit(Infantry(13, 7, Team.RED))
+        placeUnit(APC(12, 7, Team.RED))
     }
 
     fun updateCursor(x: Float, y: Float) {
@@ -204,16 +206,17 @@ class MapManager(
                 // Destination conditions:
                 // 1: Cell is empty, or occupied by this unit.
                 if (destination.unit == null || destination.unit == unit) {
-                    // Set a movement range tile, store for later retrieval and clearance.
                     cell.tile = rangesSet.getTile(RangeTiles.MOVE.ordinal)
-                    // TODO: rangetables.mdestinationcells[vec] = cell
-                }
-                // TODO:
-                //  2: Cell is occupied by a boardable unit.
-                // 3: Allow ONLY PASSAGE for units of the same or allied teams.
-                else if (destination.unit?.team == unit.team) { // TODO: or allies
-                    cell.tile = rangesSet.getTile(RangeTiles.SELECT.ordinal)
-                    // TODO: rangetables.mpassagecells[vec] = cell
+                } else if (destination.unit?.team == unit.team) { // TODO: or allies
+                    // 2: Cell is occupied by a boardable unit.
+                    if (destination.unit?.canBoard(unit) == true) {
+                        cell.tile = rangesSet.getTile(RangeTiles.MOVE.ordinal)
+                    }
+                    // 3: Allow ONLY PASSAGE for units of the same or allied teams.
+                    else {
+                        cell.tile = rangesSet.getTile(RangeTiles.SELECT.ordinal)
+                    }
+
                 }
             }
         }

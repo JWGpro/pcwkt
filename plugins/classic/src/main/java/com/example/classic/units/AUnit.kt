@@ -35,6 +35,7 @@ abstract class AUnit(
     var hp = maxHp
     var vector: CellVector
     var movesLeft = moveRange
+    val boardedUnits = mutableListOf<AUnit>()
 
     init {
         // TODO: UnitFactory?
@@ -43,5 +44,9 @@ abstract class AUnit(
 
         vector = mapManager.grid[x][y].vector
         // store in teamUnits
+    }
+
+    fun canBoard(unit: AUnit): Boolean {
+        return boardable?.contains(unit::class) == true && boardedUnits.size < boardCap
     }
 }
