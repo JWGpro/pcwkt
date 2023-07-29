@@ -20,9 +20,9 @@ abstract class AUnit(
     val price: Int,
     val moveRange: Int,
     val moveType: MoveTypes,
-    val maxHP: Float = 100f,
     val boardCap: Int = 0,
-    val boardable: Array<KClass<AUnit>>? = null
+    // TODO: Can't figure out the syntax for "subclass of AUnit".
+    val boardable: Array<KClass<*>>? = null
 ) {
     private val assetManager = ServiceLocator.assetManager
     private val mapManager = ServiceLocator.mapManager
@@ -30,7 +30,9 @@ abstract class AUnit(
 
     private val actor =
         MapActorS(TextureRegion(assetManager.get<Texture>(sprite.path)))
+    private val maxHp = 100f
 
+    var hp = maxHp
     var vector: CellVector
     var movesLeft = moveRange
 
