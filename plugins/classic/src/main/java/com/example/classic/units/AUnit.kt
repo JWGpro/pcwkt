@@ -36,6 +36,7 @@ abstract class AUnit(
     var vector: CellVector
     var movesLeft = moveRange
     val boardedUnits = mutableListOf<AUnit>()
+    var isOrderable = true
 
     init {
         // TODO: UnitFactory?

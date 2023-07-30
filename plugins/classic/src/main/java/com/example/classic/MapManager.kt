@@ -51,9 +51,6 @@ class MapManager(
     private val attackRangeLayer = newMapLayer("attackRange", mapW, mapH, CELL_SIZE)
     private val rangesSet = newTileSet("ranges")
 
-    private var state = State.DEFAULT
-    private var selectedUnit: AUnit? = null
-
     init {
         // Generate tilesets
         Terrains.values().forEach { terrain ->
@@ -80,8 +77,6 @@ class MapManager(
             }
         }
 
-        InputHandler.addListener(Controls.SELECT_NEXT) { selectNext() }
-        InputHandler.addListener(Controls.CANCEL_LAST) { cancelLast() }
     }
 
     fun loadMap() {
@@ -196,7 +191,7 @@ class MapManager(
         }
     }
 
-    private fun displayRanges(unit: AUnit) {
+    fun displayRanges(unit: AUnit) {
         val moveVectors = manRange(unit.vector, 0, unit.movesLeft)
 
         moveVectors.forEach { vec ->
@@ -225,34 +220,11 @@ class MapManager(
         }
     }
 
-    private fun selectNext() {
-        val targetNode = grid[short(cursor.actor.x)][short(cursor.actor.y)]
-
-        when (state) {
-            State.DEFAULT -> {
-                targetNode.unit?.run {
-                    displayRanges(this)
-                    selectedUnit = this
-                    state = State.SELECTED
-                }
-            }
-
-            State.SELECTED -> {
-
-            }
-
-            else -> {}
-        }
+    fun getCursorNode(): GridReference {
+        return grid[short(cursor.actor.x)][short(cursor.actor.y)]
     }
 
-    private fun cancelLast() {
-        // TODO: Almost everything
-        clearRanges()
-        selectedUnit = null
-        state = State.DEFAULT
-    }
-
-    private fun clearRanges() {
+    fun clearRanges() {
         for (x in 0 until mapW) {
             for (y in 0 until mapH) {
                 val cell = moveRangeLayer.getCell(x, y)
