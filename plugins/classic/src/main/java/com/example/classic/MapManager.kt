@@ -51,6 +51,9 @@ class MapManager(
     private val attackRangeLayer = newMapLayer("attackRange", mapW, mapH, CELL_SIZE)
     private val rangesSet = newTileSet("ranges")
 
+    private var state = State.DEFAULT
+    private var selectedUnit: AUnit? = null
+
     init {
         // Generate tilesets
         Terrains.values().forEach { terrain ->
@@ -223,15 +226,30 @@ class MapManager(
     }
 
     private fun selectNext() {
-        val gridReference = grid[short(cursor.actor.x)][short(cursor.actor.y)]
-        gridReference.unit?.run {
-            displayRanges(this)
+        val targetNode = grid[short(cursor.actor.x)][short(cursor.actor.y)]
+
+        when (state) {
+            State.DEFAULT -> {
+                targetNode.unit?.run {
+                    displayRanges(this)
+                    selectedUnit = this
+                    state = State.SELECTED
+                }
+            }
+
+            State.SELECTED -> {
+
+            }
+
+            else -> {}
         }
     }
 
     private fun cancelLast() {
         // TODO: Almost everything
         clearRanges()
+        selectedUnit = null
+        state = State.DEFAULT
     }
 
     private fun clearRanges() {

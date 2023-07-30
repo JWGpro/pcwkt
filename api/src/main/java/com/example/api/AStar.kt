@@ -12,14 +12,14 @@ object AStar {
 
     class Path(val route: Array<Node>, val cost: Int)
 
-    // FIXME: Inefficient data structure for this purpose.
-    private val frontier = mutableMapOf<Node, Int>()
-
     fun findPath(start: Node, destination: Node): Path? {
         // Return null early if destination is unreachable.
         if (destination.cost == null) return null
 
-        queueIn(start, 0)
+        // FIXME: Inefficient data structure for this purpose.
+        val frontier = mutableMapOf<Node, Int>()
+
+        queueIn(frontier, start, 0)
 
         val cameFrom = mutableMapOf<Node, Node>()
         val bestRouteCosts = mutableMapOf<Node, Int>()
@@ -27,7 +27,7 @@ object AStar {
 
         while (frontier.isNotEmpty()) {
             // Get the highest-priorty cell from the frontier.
-            val current = queueOut()
+            val current = queueOut(frontier)
 
             // If we've reached the destination, return the path and its cost. If not, keep working.
             if (current == destination) {
@@ -56,7 +56,7 @@ object AStar {
                         bestRouteCosts[neighbour] = newCost
                         // put neighbour in the frontier with its checking priority (lower is better),
                         val priority = newCost + neighbour.vector.manDist(destination.vector)
-                        queueIn(neighbour, priority)
+                        queueIn(frontier, neighbour, priority)
                         // and store the path.
                         cameFrom[neighbour] = current
                     }
@@ -69,11 +69,11 @@ object AStar {
         return null
     }
 
-    private fun queueIn(node: Node, priority: Int) {
+    private fun queueIn(frontier: MutableMap<Node, Int>, node: Node, priority: Int) {
         frontier[node] = priority
     }
 
-    private fun queueOut(): Node {
+    private fun queueOut(frontier: MutableMap<Node, Int>): Node {
         // Assumes the frontier will never be empty when this is called (or else throws)
         // Returns the CellVector with the lowest priority value (highest actual priority)
         val sorted = frontier.entries.sortedBy { it.value }
