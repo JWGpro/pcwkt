@@ -189,13 +189,13 @@ class MapManager(
     }
 
     fun displayRanges(unit: AUnit) {
-        val moveVectors = manRange(unit.vector, 0, unit.movesLeft)
+        val moveVectors = manRange(unit.gridRef.vector, 0, unit.movesLeft)
 
         moveVectors.forEach { vec ->
             setCosts(unit)
-            val path = AStar.findPath(grid[unit.vector.x][unit.vector.y], grid[vec.x][vec.y])
+            val path = AStar.findPath(unit.gridRef, grid[vec.x][vec.y])
             // TODO: Incorporate movesLeft into AStar.findPath().
-            if (path != null && path.cost <= unit.movesLeft) {
+            if (path != null && path.totalCost <= unit.movesLeft) {
                 val destination = grid[vec.x][vec.y]
                 val cell = moveRangeLayer.getCell(vec.x, vec.y)
                 // Destination conditions:
@@ -260,7 +260,7 @@ class MapManager(
 
     private fun placeUnit(unit: AUnit) {
         // When I did this in the AUnit init I was warned that I was leaking "this", which is fair.
-        grid[unit.vector.x][unit.vector.y].unit = unit
+        unit.gridRef.unit = unit
     }
 
 }

@@ -3,7 +3,11 @@ package com.example.classic.selectionstate
 import com.example.classic.ServiceLocator
 import com.example.classic.units.AUnit
 
-class SelectedState(private val unit: AUnit) : SelectionState {
+class SelectedState(
+    private val stack: ArrayDeque<SelectionState>,
+    private val unit: AUnit
+) :
+    SelectionState {
     private val mapManager = ServiceLocator.mapManager
 
     init {
@@ -15,7 +19,8 @@ class SelectedState(private val unit: AUnit) : SelectionState {
 
         // TODO: if unit.team == player.team
         if (mapManager.isValidDestination(targetNode)) {
-            return MovedState(unit, targetNode)
+            stack.addLast(this)
+            return MovedState(stack, unit, targetNode)
         }
 
         return this
@@ -23,6 +28,7 @@ class SelectedState(private val unit: AUnit) : SelectionState {
 
     override fun undo(): SelectionState {
         mapManager.clearRanges()
-        return DefaultState()
+
+        return stack.removeLast()
     }
 }

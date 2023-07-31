@@ -10,7 +10,7 @@ object AStar {
     //  discard them immediately. It's a mess.
     open class Node(var vector: CellVector, val neighbours: Set<Node>, var cost: Int?)
 
-    class Path(val route: Array<Node>, val cost: Int)
+    class Path(val route: Array<Node>, val totalCost: Int)
 
     fun findPath(start: Node, destination: Node): Path? {
         // Return null early if destination is unreachable.
@@ -35,8 +35,8 @@ object AStar {
                 var traceNode: Node? = destination
 
                 while (traceNode != start) {
-                    traceNode?.run {
-                        route.add(this)
+                    traceNode?.let {
+                        route.add(it)
                     }
                     traceNode = cameFrom[traceNode]
                 }
@@ -48,8 +48,8 @@ object AStar {
             // For each neighbour to this cell,
             current.neighbours.forEach { neighbour ->
                 // Proceed if traversable...
-                neighbour.cost?.run {
-                    val newCost = bestRouteCosts[current]!! + this
+                neighbour.cost?.let {
+                    val newCost = bestRouteCosts[current]!! + it
                     // If neighbour hasn't been checked, or this path to it has a lower cost,
                     if (!bestRouteCosts.contains(neighbour) || newCost < bestRouteCosts[neighbour]!!) {
                         // store the new cost of moving to neighbour,

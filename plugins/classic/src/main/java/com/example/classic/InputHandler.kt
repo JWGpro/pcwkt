@@ -31,7 +31,7 @@ object InputHandler {
     fun tryBind(inputType: Binds, inputId: Int) {
         // Looks for a bound control, and calls listeners.
         val boundControl = inputType.map[inputId]
-        boundControl?.run {
+        boundControl?.let {
             callListeners(boundControl)
         }
     }
