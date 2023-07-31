@@ -29,7 +29,8 @@ class MapManager(
         vector: CellVector,
         neighbours: MutableSet<AStar.Node>,
         var unit: AUnit?,
-        var terrain: Terrains
+        var terrain: Terrains,
+        var rangeTileType: RangeTiles?
     ) : AStar.Node(vector, neighbours, null)
 
     // TODO: These should come from the loaded map
@@ -41,14 +42,15 @@ class MapManager(
                 CellVector(0, 0),
                 mutableSetOf(),
                 null,
-                Terrains.SEA
+                Terrains.SEA,
+                null,
             )
         }
     }
-    private val terrainLayer = newMapLayer("terrain", mapW, mapH, CELL_SIZE)
+    private val terrainLayer = newMapLayer("terrain")
     private val terrainSet = newTileSet("terrain")
-    private val moveRangeLayer = newMapLayer("moveRange", mapW, mapH, CELL_SIZE)
-    private val attackRangeLayer = newMapLayer("attackRange", mapW, mapH, CELL_SIZE)
+    private val moveRangeLayer = newMapLayer("moveRange")
+    private val attackRangeLayer = newMapLayer("attackRange")
     private val rangesSet = newTileSet("ranges")
 
     init {
@@ -63,18 +65,16 @@ class MapManager(
         }
 
         // Init grid and terrain
-        for (x in 0 until mapW) {
-            for (y in 0 until mapH) {
-                grid[x][y].vector = CellVector(x, y)
-                setTerrain(x, y, Terrains.SEA)
+        forMap { x, y ->
+            grid[x][y].vector = CellVector(x, y)
+            setTerrain(x, y, Terrains.SEA)
 
-                // I don't know why it doesn't pick up the MutableSet that I declared.
-                val neighbours = grid[x][y].neighbours as MutableSet<AStar.Node>
-                neighbours.add(grid[x][clampMax(y + 1, mapH - 1)])
-                neighbours.add(grid[x][clampMin(y - 1, 0)])
-                neighbours.add(grid[clampMin(x - 1, 0)][y])
-                neighbours.add(grid[clampMax(x + 1, mapW - 1)][y])
-            }
+            // I don't know why it doesn't pick up the MutableSet that I declared.
+            val neighbours = grid[x][y].neighbours as MutableSet<AStar.Node>
+            neighbours.add(grid[x][clampMax(y + 1, mapH - 1)])
+            neighbours.add(grid[x][clampMin(y - 1, 0)])
+            neighbours.add(grid[clampMin(x - 1, 0)][y])
+            neighbours.add(grid[clampMax(x + 1, mapW - 1)][y])
         }
 
     }
@@ -123,17 +123,16 @@ class MapManager(
         return floor(coordinate / CELL_SIZE).toInt()
     }
 
-    private fun newMapLayer(name: String, w: Int, h: Int, cellSize: Int): TiledMapTileLayer {
+    private fun newMapLayer(name: String): TiledMapTileLayer {
         val layers = tiledMap.layers
-        val tileLayer = TiledMapTileLayer(w, h, cellSize, cellSize)
+        val tileLayer = TiledMapTileLayer(mapW, mapH, CELL_SIZE, CELL_SIZE)
         tileLayer.name = name
         layers.add(tileLayer)
-        for (x in 0 until w) {
-            for (y in 0 until h) {
-                // Fills the layer with cells - tiles should then be assigned to the cells.
-                val cell = TiledMapTileLayer.Cell()
-                tileLayer.setCell(x, y, cell)
-            }
+
+        forMap { x, y ->
+            // Fills the layer with cells - tiles should then be assigned to the cells.
+            val cell = TiledMapTileLayer.Cell()
+            tileLayer.setCell(x, y, cell)
         }
         return tileLayer
     }
@@ -184,10 +183,8 @@ class MapManager(
     }
 
     private fun setCosts(unit: AUnit) {
-        for (x in 0 until mapW) {
-            for (y in 0 until mapH) {
-                grid[x][y].cost = grid[x][y].terrain.moveCosts[unit.moveType]
-            }
+        forMap { x, y ->
+            grid[x][y].cost = grid[x][y].terrain.moveCosts[unit.moveType]
         }
     }
 
@@ -205,14 +202,17 @@ class MapManager(
                 // 1: Cell is empty, or occupied by this unit.
                 if (destination.unit == null || destination.unit == unit) {
                     cell.tile = rangesSet.getTile(RangeTiles.MOVE.ordinal)
+                    grid[vec.x][vec.y].rangeTileType = RangeTiles.MOVE
                 } else if (destination.unit?.team == unit.team) { // TODO: or allies
                     // 2: Cell is occupied by a boardable unit.
                     if (destination.unit?.canBoard(unit) == true) {
                         cell.tile = rangesSet.getTile(RangeTiles.MOVE.ordinal)
+                        grid[vec.x][vec.y].rangeTileType = RangeTiles.MOVE
                     }
                     // 3: Allow ONLY PASSAGE for units of the same or allied teams.
                     else {
                         cell.tile = rangesSet.getTile(RangeTiles.SELECT.ordinal)
+                        grid[vec.x][vec.y].rangeTileType = RangeTiles.SELECT
                     }
 
                 }
@@ -225,10 +225,35 @@ class MapManager(
     }
 
     fun clearRanges() {
+        forMap { x, y ->
+            val cell = moveRangeLayer.getCell(x, y)
+            cell.tile = null
+            grid[x][y].rangeTileType = null
+        }
+    }
+
+    fun isValidDestination(destination: GridReference): Boolean {
+        return setOf(RangeTiles.MOVE).contains(destination.rangeTileType)
+    }
+
+    fun hideRanges() {
+        forMap { x, y ->
+            val cell = moveRangeLayer.getCell(x, y)
+            cell.tile = null
+        }
+    }
+
+    fun showRanges() {
+        forMap { x, y ->
+            val cell = moveRangeLayer.getCell(x, y)
+            cell.tile = grid[x][y].rangeTileType?.let { rangesSet.getTile(it.ordinal) }
+        }
+    }
+
+    private inline fun forMap(fn: (x: Int, y: Int) -> Unit) {
         for (x in 0 until mapW) {
             for (y in 0 until mapH) {
-                val cell = moveRangeLayer.getCell(x, y)
-                cell.tile = null
+                fn(x, y)
             }
         }
     }

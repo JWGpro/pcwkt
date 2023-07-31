@@ -13,7 +13,11 @@ class SelectedState(private val unit: AUnit) : SelectionState {
     override fun advance(): SelectionState {
         val targetNode = mapManager.getCursorNode()
 
-        println("Try moving this $unit")
+        // TODO: if unit.team == player.team
+        if (mapManager.isValidDestination(targetNode)) {
+            return MovedState(unit, targetNode)
+        }
+
         return this
     }
 
