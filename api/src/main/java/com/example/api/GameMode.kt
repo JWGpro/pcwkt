@@ -10,9 +10,11 @@ import org.pf4j.ExtensionPoint
 interface GameMode : ExtensionPoint {
     fun gameInit(
         gameStage: Stage,
+        uiStage: Stage,
         assetManager: AssetManager,
         tiledMap: TiledMap,
-        gameCamera: OrthographicCamera
+        gameCamera: OrthographicCamera,
+        uiCamera: OrthographicCamera
     )
 
     fun gameLoop(deltaTime: Float)

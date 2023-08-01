@@ -81,9 +81,11 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
         //  Well, they can import anything they want. It's up to us to restrict permissions.
         gameMode.gameInit(
             gameStage,
+            uiStage,
             assetManager,
             tiledMap,
-            gameCamera
+            gameCamera,
+            uiCamera
         )
 
         // print extensions for each started plugin

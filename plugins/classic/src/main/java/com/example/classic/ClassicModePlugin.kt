@@ -6,6 +6,8 @@ import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.example.api.GameMode
+import com.example.classic.selectionstate.SelectionStateManager
+import com.example.classic.ui.ActionMenu
 import org.pf4j.Extension
 import org.pf4j.Plugin
 import org.pf4j.PluginWrapper
@@ -29,21 +31,37 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
 
         override fun gameInit(
             gameStage: Stage,
+            uiStage: Stage,
             assetManager: AssetManager,
             tiledMap: TiledMap,
-            gameCamera: OrthographicCamera
+            gameCamera: OrthographicCamera,
+            uiCamera: OrthographicCamera
         ) {
             this.gameCamera = gameCamera
             gameCamera.zoom = 0.5f
 
             Assets.loadAll(assetManager)
 
+            // TODO: I think the concept of the ServiceLocator is fine (i.e. not passing stuff
+            //  around to everything). But the implementation here has got to go.
+            //  As in, it needs to be the next highest priority to fix.
+
             val cursor = Cursor(gameStage, assetManager)
             mapManager = MapManager(tiledMap, cursor)
 
-            ServiceLocator.init(gameStage, assetManager, mapManager)
+            // This needs to last indefinitely, so something needs to hold onto it
+            val selectionStateManager = SelectionStateManager(mapManager)
 
-            // Don't do this before ServiceLocator.init()
+            val actionMenu = ActionMenu(uiStage, assetManager, mapManager, selectionStateManager)
+
+            ServiceLocator.init(
+                gameStage,
+                assetManager,
+                actionMenu,
+                mapManager,
+            )
+
+            // Don't do this before ServiceLocator.init()!
             mapManager.loadMap()
         }
 

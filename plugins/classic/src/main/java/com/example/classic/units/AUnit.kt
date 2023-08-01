@@ -1,5 +1,6 @@
 package com.example.classic.units
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.example.api.AStar
@@ -45,6 +46,8 @@ abstract class AUnit(
         gameStage.addActor(actor)
 
         gridRef = mapManager.grid[x][y]
+        // MapManager.placeUnit() will set `gridRef.unit = this`
+
         // TODO: store in teamUnits
     }
 
@@ -79,12 +82,25 @@ abstract class AUnit(
             }
         }
 
-        // Only kill the ref if the coordinates the unit holds, do in fact refer to itself on the grid.
-        // Otherwise, we might kill the ref of its transport.
-
-        // TODO: Does this need to be done now?
-//        if (gridRef.unit == this) gridRef.unit = null
+        killUnitRef()
         gridRef = destination
-//        gridRef.unit = this
+        storeUnitRef()
+    }
+
+    // Got some "accidental override" error when this was called "wait".
+    fun waitHere() {
+        isOrderable = false
+        actor.color = Color(0x7f7f7fff)  // Grey
+    }
+
+    private fun killUnitRef() {
+        // Only wipe the unit ref if it did in fact refer to this unit. That is, a normal move.
+        // This will not be the case if this unit is moving out of a transport.
+        if (gridRef.unit == this) gridRef.unit = null
+    }
+
+    private fun storeUnitRef() {
+        // Similarly, don't set the unit ref if this unit is moving onto a transport.
+        if (gridRef.unit == null) gridRef.unit = this
     }
 }

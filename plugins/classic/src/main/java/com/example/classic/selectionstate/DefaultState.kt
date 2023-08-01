@@ -1,9 +1,8 @@
 package com.example.classic.selectionstate
 
-import com.example.classic.ServiceLocator
+import com.example.classic.MapManager
 
-class DefaultState : SelectionState {
-    private val mapManager = ServiceLocator.mapManager
+class DefaultState(private val mapManager: MapManager) : SelectionState {
 
     // Stores states so you don't have to re-instantiate them when undoing, you just pop().
     // This also means that two states could converge on one when advancing,

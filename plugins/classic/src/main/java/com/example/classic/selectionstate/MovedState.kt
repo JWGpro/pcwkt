@@ -12,6 +12,8 @@ class MovedState(
     SelectionState {
 
     private val mapManager = ServiceLocator.mapManager
+    private val actionMenu = ServiceLocator.actionMenu
+
     private val startingNode = unit.gridRef
     private var blocking = true
 
@@ -20,26 +22,24 @@ class MovedState(
         mapManager.hideRanges()
         unit.move(targetNode, {
             blocking = false
-            // TODO: evaluateActions()
-            println("evaluateActions")
-        })
 
-        // TODO: Command was used here for replays
+            // Defer to ActionMenu
+            actionMenu.show(unit)
+        })
     }
 
     override fun advance(): SelectionState {
         // TODO: Skip each of the MoveActions. Need to pipe the SequenceAction from MapActor.
         if (blocking) return this
 
-        // TODO: stack.addLast(this)
-        println("Initiated some action")
+        // Nothing here. ActionMenu is handling this.
         return this
     }
 
     override fun undo(): SelectionState {
         if (blocking) return this
 
-        // TODO: actionMenu.clear()
+        actionMenu.clear()
         mapManager.showRanges()
         unit.move(startingNode, {}, rewind = true)
 
