@@ -42,10 +42,6 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
 
             Assets.loadAll(assetManager)
 
-            // TODO: I think the concept of the ServiceLocator is fine (i.e. not passing stuff
-            //  around to everything). But the implementation here has got to go.
-            //  As in, it needs to be the next highest priority to fix.
-
             val cursor = Cursor(gameStage, assetManager)
             mapManager = MapManager(tiledMap, cursor)
 
@@ -54,14 +50,13 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
 
             val actionMenu = ActionMenu(uiStage, assetManager, mapManager, selectionStateManager)
 
-            ServiceLocator.init(
-                gameStage,
-                assetManager,
-                actionMenu,
-                mapManager,
-            )
+            // TODO: This implementation makes the whole gameInit very confusing
+            ServiceLocator.gameStage = gameStage
+            ServiceLocator.assetManager = assetManager
+            ServiceLocator.actionMenu = actionMenu
+            ServiceLocator.mapManager = mapManager
 
-            // Don't do this before ServiceLocator.init()!
+            // All the below must come after the ServiceLocator init!
             mapManager.loadMap()
         }
 
