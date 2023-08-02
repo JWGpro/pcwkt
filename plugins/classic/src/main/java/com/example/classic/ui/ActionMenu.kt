@@ -48,8 +48,7 @@ class ActionMenu(
         UNLOAD("Unload", { false }, {}),
         HOLD("Hold", { false }, {}),
         WAIT("Wait", { !BOARD.isShowable(it) }, {
-            // TODO: Disabled until turn cycling is implemented
-//            it.unit?.waitHere()
+            it.unit?.waitHere()
 
             // End move (not end turn)
             it.clear()

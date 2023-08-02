@@ -88,7 +88,14 @@ abstract class AUnit(
     // Got some "accidental override" error when this was called "wait".
     fun waitHere() {
         isOrderable = false
-        actor.color = Color(0x7f7f7fff)  // Grey
+        actor.color = Color.GRAY
+    }
+
+    fun restore() {
+        movesLeft = moveRange
+
+        isOrderable = true
+        actor.color = Color.WHITE
     }
 
     private fun killUnitRef() {

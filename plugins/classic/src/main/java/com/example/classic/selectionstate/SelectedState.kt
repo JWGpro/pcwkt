@@ -9,6 +9,7 @@ class SelectedState(
 ) :
     SelectionState {
     private val mapManager = ServiceLocator.mapManager
+    private val turnManager = ServiceLocator.turnManager
 
     init {
         mapManager.displayRanges(unit)
@@ -17,8 +18,9 @@ class SelectedState(
     override fun advance(): SelectionState {
         val targetNode = mapManager.getCursorNode()
 
-        // TODO: if unit.team == player.team
-        if (mapManager.isValidDestination(targetNode)) {
+        if (unit.team == turnManager.teamsPlaying.current()
+            && mapManager.isValidDestination(targetNode)
+        ) {
             stack.addLast(this)
             return MovedState(stack, unit, targetNode)
         }

@@ -42,8 +42,9 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
 
             Assets.loadAll(assetManager)
 
+            val turnManager = TurnManager()
             val cursor = Cursor(gameStage, assetManager)
-            mapManager = MapManager(tiledMap, cursor)
+            mapManager = MapManager(tiledMap, cursor, turnManager.teamUnits)
 
             // This needs to last indefinitely, so something needs to hold onto it
             val selectionStateManager = SelectionStateManager(mapManager)
@@ -55,6 +56,7 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
             ServiceLocator.assetManager = assetManager
             ServiceLocator.actionMenu = actionMenu
             ServiceLocator.mapManager = mapManager
+            ServiceLocator.turnManager = turnManager
 
             // All the below must come after the ServiceLocator init!
             mapManager.loadMap()

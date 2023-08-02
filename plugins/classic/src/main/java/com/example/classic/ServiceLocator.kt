@@ -12,5 +12,6 @@ object ServiceLocator {
     lateinit var assetManager: AssetManager
     lateinit var mapManager: MapManager
     lateinit var actionMenu: ActionMenu
+    lateinit var turnManager: TurnManager
 
 }

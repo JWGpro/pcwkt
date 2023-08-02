@@ -9,7 +9,6 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileSet
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile
 import com.example.api.AStar
 import com.example.api.CellVector
-import com.example.api.CyclingArray
 import com.example.api.Util.clampMax
 import com.example.api.Util.clampMin
 import com.example.classic.units.APC
@@ -24,7 +23,8 @@ private const val CELL_SIZE = 16
 
 class MapManager(
     private val tiledMap: TiledMap,
-    private val cursor: Cursor
+    private val cursor: Cursor,
+    private val teamUnits: Map<Team, MutableList<AUnit>>
 ) {
     class GridReference(
         vector: CellVector,
@@ -54,12 +54,6 @@ class MapManager(
     private val attackRangeLayer = newMapLayer("attackRange")
     private val rangesSet = newTileSet("ranges")
 
-    // FIXME: MapManager shouldn't care about any of this
-    private val teamUnits: Map<Team, MutableList<AUnit>> = Team.values().associateWith {
-        mutableListOf()
-    }
-    private val playingTeams = CyclingArray(arrayOf(Team.RED, Team.BLUE))
-
     init {
         // Generate tilesets
         Terrains.values().forEach { terrain ->
@@ -84,12 +78,6 @@ class MapManager(
             neighbours.add(grid[clampMax(x + 1, mapW - 1)][y])
         }
 
-        InputHandler.addListener(Controls.NEXT_TURN) { cycleTurn() }
-
-    }
-
-    private fun cycleTurn(rewind: Boolean = false) {
-        // TODO:
     }
 
     fun loadMap() {
