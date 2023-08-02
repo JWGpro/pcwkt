@@ -25,6 +25,11 @@ object InputHandler {
                 SCROLL_UP to Controls.ZOOM_IN,
                 SCROLL_DOWN to Controls.ZOOM_OUT
             )
+        ),
+        KEY_DOWN(
+            mapOf(
+                Input.Keys.E to Controls.NEXT_TURN
+            )
         )
     }
 

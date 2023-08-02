@@ -65,17 +65,15 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
         }
 
         override fun keyDown(keycode: Int): Boolean {
-            println("Classic mode keyDown")
+            InputHandler.tryBind(InputHandler.Binds.KEY_DOWN, keycode)
             return true;
         }
 
         override fun keyUp(keycode: Int): Boolean {
-            println("Classic mode keyUp")
             return true;
         }
 
         override fun keyTyped(character: Char): Boolean {
-            println("Classic mode keyTyped")
             return true;
         }
 

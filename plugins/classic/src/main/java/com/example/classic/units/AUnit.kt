@@ -47,8 +47,6 @@ abstract class AUnit(
 
         gridRef = mapManager.grid[x][y]
         // MapManager.placeUnit() will set `gridRef.unit = this`
-
-        // TODO: store in teamUnits
     }
 
     fun canBoard(unit: AUnit): Boolean {

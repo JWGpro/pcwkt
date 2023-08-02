@@ -15,7 +15,7 @@ dependencies {
     api("com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion")
     api("com.badlogicgames.gdx:gdx-freetype:$gdxVersion")
     api("io.github.libktx:ktx-app:$ktxVersion")
-    implementation ("org.pf4j:pf4j:${pf4jVersion}")
+    implementation("org.pf4j:pf4j:${pf4jVersion}")
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -36,4 +36,3 @@ eclipse {
         name = "${appName}-core"
     }
 }
-
