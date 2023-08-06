@@ -5,5 +5,7 @@ enum class Controls {
     CANCEL_LAST,
     NEXT_TURN,
     ZOOM_IN,
-    ZOOM_OUT
+    ZOOM_OUT,
+    REPLAY_UNDO,
+    REPLAY_REDO,
 }

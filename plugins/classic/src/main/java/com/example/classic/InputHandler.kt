@@ -28,7 +28,10 @@ object InputHandler {
         ),
         KEY_DOWN(
             mapOf(
-                Input.Keys.E to Controls.NEXT_TURN
+                Input.Keys.BACK to Controls.CANCEL_LAST, // TODO: Mobile only?
+                Input.Keys.E to Controls.NEXT_TURN,
+                Input.Keys.MINUS to Controls.REPLAY_UNDO,
+                Input.Keys.EQUALS to Controls.REPLAY_REDO,
             )
         )
     }

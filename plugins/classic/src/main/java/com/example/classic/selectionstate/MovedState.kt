@@ -2,6 +2,7 @@ package com.example.classic.selectionstate
 
 import com.example.classic.MapManager
 import com.example.classic.ServiceLocator
+import com.example.classic.commands.MoveCommand
 import com.example.classic.units.AUnit
 
 class MovedState(
@@ -20,11 +21,12 @@ class MovedState(
     init {
         // Starts off blocking
         mapManager.hideRanges()
+        val moveCommand = MoveCommand(unit, targetNode)
         unit.move(targetNode, {
             blocking = false
 
             // Defer to ActionMenu
-            actionMenu.show(unit)
+            actionMenu.show(moveCommand)
         })
     }
 
@@ -41,7 +43,7 @@ class MovedState(
 
         actionMenu.clear()
         mapManager.showRanges()
-        unit.move(startingNode, {}, rewind = true)
+        unit.move(startingNode, {}, skipAnim = true)
 
         return stack.removeLast()
     }

@@ -42,14 +42,16 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
 
             Assets.loadAll(assetManager)
 
-            val turnManager = TurnManager()
+            val replayManager = ReplayManager()
+            val turnManager = TurnManager(replayManager)
             val cursor = Cursor(gameStage, assetManager)
             mapManager = MapManager(tiledMap, cursor, turnManager.teamUnits)
 
             // This needs to last indefinitely, so something needs to hold onto it
             val selectionStateManager = SelectionStateManager(mapManager)
 
-            val actionMenu = ActionMenu(uiStage, assetManager, mapManager, selectionStateManager)
+            val actionMenu =
+                ActionMenu(uiStage, assetManager, mapManager, selectionStateManager, replayManager)
 
             // TODO: This implementation makes the whole gameInit very confusing
             ServiceLocator.gameStage = gameStage

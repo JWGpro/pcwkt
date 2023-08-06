@@ -4,16 +4,16 @@ enum class Terrains(
     val title: String,
     val path: String,
     val defence: Int,
-    val moveCosts: Map<MoveTypes, Int>
+    val moveCosts: Map<MovementTypes, Int>
 ) {
     SEA(
         "Sea",
         "sea.png",
         0,
         mapOf(
-            MoveTypes.AIR to 1,
-            MoveTypes.SHIP to 1,
-            MoveTypes.LANDER to 1,
+            MovementTypes.AIR to 1,
+            MovementTypes.SHIP to 1,
+            MovementTypes.LANDER to 1,
         )
     ),
     REEF(
@@ -21,9 +21,9 @@ enum class Terrains(
         "reef.png",
         0,
         mapOf(
-            MoveTypes.AIR to 1,
-            MoveTypes.SHIP to 2,
-            MoveTypes.LANDER to 2
+            MovementTypes.AIR to 1,
+            MovementTypes.SHIP to 2,
+            MovementTypes.LANDER to 2
         )
     ),
     ROAD(
@@ -31,11 +31,11 @@ enum class Terrains(
         "road.png",
         0,
         mapOf(
-            MoveTypes.INF to 1,
-            MoveTypes.MECH to 1,
-            MoveTypes.TYRE to 1,
-            MoveTypes.TRACK to 1,
-            MoveTypes.AIR to 1
+            MovementTypes.INF to 1,
+            MovementTypes.MECH to 1,
+            MovementTypes.TYRE to 1,
+            MovementTypes.TRACK to 1,
+            MovementTypes.AIR to 1
         )
     ),
     PLAIN(
@@ -43,11 +43,11 @@ enum class Terrains(
         "plain.png",
         1,
         mapOf(
-            MoveTypes.INF to 1,
-            MoveTypes.MECH to 1,
-            MoveTypes.TYRE to 2,
-            MoveTypes.TRACK to 1,
-            MoveTypes.AIR to 1
+            MovementTypes.INF to 1,
+            MovementTypes.MECH to 1,
+            MovementTypes.TYRE to 2,
+            MovementTypes.TRACK to 1,
+            MovementTypes.AIR to 1
         )
     ),
     FOREST(
@@ -55,11 +55,11 @@ enum class Terrains(
         "forest.png",
         2,
         mapOf(
-            MoveTypes.INF to 1,
-            MoveTypes.MECH to 1,
-            MoveTypes.TYRE to 3,
-            MoveTypes.TRACK to 2,
-            MoveTypes.AIR to 1
+            MovementTypes.INF to 1,
+            MovementTypes.MECH to 1,
+            MovementTypes.TYRE to 3,
+            MovementTypes.TRACK to 2,
+            MovementTypes.AIR to 1
         )
     ),
     MOUNTAIN(
@@ -67,9 +67,9 @@ enum class Terrains(
         "mountain.png",
         4,
         mapOf(
-            MoveTypes.INF to 2,
-            MoveTypes.MECH to 1,
-            MoveTypes.AIR to 1
+            MovementTypes.INF to 2,
+            MovementTypes.MECH to 1,
+            MovementTypes.AIR to 1
         )
     ),
     RIVER(
@@ -77,9 +77,9 @@ enum class Terrains(
         "river.png",
         0,
         mapOf(
-            MoveTypes.INF to 2,
-            MoveTypes.MECH to 1,
-            MoveTypes.AIR to 1
+            MovementTypes.INF to 2,
+            MovementTypes.MECH to 1,
+            MovementTypes.AIR to 1
         )
     ),
     SHOAL(
@@ -87,12 +87,12 @@ enum class Terrains(
         "shoal.png",
         0,
         mapOf(
-            MoveTypes.INF to 1,
-            MoveTypes.MECH to 1,
-            MoveTypes.TYRE to 2,
-            MoveTypes.TRACK to 1,
-            MoveTypes.AIR to 1,
-            MoveTypes.LANDER to 1
+            MovementTypes.INF to 1,
+            MovementTypes.MECH to 1,
+            MovementTypes.TYRE to 2,
+            MovementTypes.TRACK to 1,
+            MovementTypes.AIR to 1,
+            MovementTypes.LANDER to 1
         )
     )
 }

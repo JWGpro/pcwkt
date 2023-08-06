@@ -7,12 +7,17 @@ import com.example.api.AStar
 import com.example.api.MapActorS
 import com.example.classic.Assets
 import com.example.classic.MapManager
-import com.example.classic.MoveTypes
+import com.example.classic.MovementTypes
 import com.example.classic.ServiceLocator
 import com.example.classic.Team
 import kotlin.reflect.KClass
 
 // "Unit" was too close to the Kotlin inbuilt
+// TODO: AUnit subclasses should be implemented in data. It would be an obvious, and probably by far
+//  the most common, use case that people would want to tweak the numbers on existing units so as
+//  to make a custom ruleset - not having to recompile the game into a separate mode to do this.
+//  ...Though this opens up the question of how much else ought to be data-driven.
+//  Client-side customisation of assets (and localisation strings) is yet another issue.
 abstract class AUnit(
     x: Int,
     y: Int,
@@ -21,7 +26,7 @@ abstract class AUnit(
     val name: String,
     val price: Int,
     val moveRange: Int,
-    val moveType: MoveTypes,
+    val moveType: MovementTypes,
     val boardCap: Int = 0,
     // TODO: Can't figure out the syntax for "subclass of AUnit".
     val boardable: Array<KClass<*>>? = null
@@ -56,7 +61,7 @@ abstract class AUnit(
     fun move(
         destination: MapManager.GridReference,
         after: () -> Unit,
-        rewind: Boolean = false
+        skipAnim: Boolean = false
     ) {
         if (destination == gridRef) {
             // No movement needed
@@ -64,10 +69,11 @@ abstract class AUnit(
             return
         }
 
-        if (rewind) {
+        if (skipAnim) {
             val x = mapManager.long(destination.vector.x)
             val y = mapManager.long(destination.vector.y)
             actor.setPosition(x, y)
+            after()
         } else {
             val path = AStar.findPath(gridRef, destination)
             path?.let {
@@ -91,11 +97,18 @@ abstract class AUnit(
         actor.color = Color.GRAY
     }
 
-    fun restore() {
-        movesLeft = moveRange
-
+    fun unwait() {
         isOrderable = true
         actor.color = Color.WHITE
+    }
+
+    fun restore() {
+        movesLeft = moveRange
+        unwait()
+    }
+
+    fun isDead(): Boolean {
+        return hp <= 0f
     }
 
     private fun killUnitRef() {

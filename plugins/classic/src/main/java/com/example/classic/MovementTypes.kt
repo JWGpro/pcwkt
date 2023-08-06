@@ -1,6 +1,6 @@
 package com.example.classic
 
-enum class MoveTypes(val title: String) {
+enum class MovementTypes(val title: String) {
     INF("Infantry"),
     MECH("Mech"),
     TYRE("Tyre"),

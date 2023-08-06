@@ -20,7 +20,11 @@ import kotlin.math.floor
 private const val EXT = "pcwkt"
 private const val CELL_SIZE = 16
 
-
+// TODO: May need to expand this to allow for more intricate rendering.
+//  e.g. Mobius Front '83; looks more textured than tiled.
+//  This has nothing to do with multiplayer business logic, so game versions with just updated
+//  rendering code could still play online with older clients running the same gamemode.
+//  i.e. Spring's serialVersionUID.
 class MapManager(
     private val tiledMap: TiledMap,
     private val cursor: Cursor,
