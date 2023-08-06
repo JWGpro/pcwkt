@@ -28,7 +28,7 @@ private const val CELL_SIZE = 16
 class MapManager(
     private val tiledMap: TiledMap,
     private val cursor: Cursor,
-    private val teamUnits: Map<Team, MutableList<AUnit>>
+    private val turnManager: TurnManager
 ) {
     class GridReference(
         vector: CellVector,
@@ -190,7 +190,15 @@ class MapManager(
 
     private fun setCosts(unit: AUnit) {
         forMap { x, y ->
-            grid[x][y].cost = grid[x][y].terrain.moveCosts[unit.moveType]
+            val occupier = grid[x][y].unit
+
+            // TODO: Check for allies
+            // An enemy will prevent passage.
+            if (occupier != null && occupier.team != turnManager.teamsPlaying.current()) {
+                grid[x][y].cost = null
+            } else {
+                grid[x][y].cost = grid[x][y].terrain.moveCosts[unit.moveType]
+            }
         }
     }
 
@@ -267,7 +275,7 @@ class MapManager(
     private fun placeUnit(unit: AUnit) {
         // When I did this in the AUnit init I was warned that I was leaking "this", which is fair.
         unit.gridRef.unit = unit
-        teamUnits[unit.team]?.add(unit)
+        turnManager.teamUnits[unit.team]?.add(unit)
     }
 
 }

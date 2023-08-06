@@ -85,6 +85,8 @@ abstract class AUnit(
             }
         }
 
+        // TODO:
+//        movesLeft -= cost
         killUnitRef()
         gridRef = destination
         storeUnitRef()

@@ -45,7 +45,7 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
             val replayManager = ReplayManager()
             val turnManager = TurnManager(replayManager)
             val cursor = Cursor(gameStage, assetManager)
-            mapManager = MapManager(tiledMap, cursor, turnManager.teamUnits)
+            mapManager = MapManager(tiledMap, cursor, turnManager)
 
             // This needs to last indefinitely, so something needs to hold onto it
             val selectionStateManager = SelectionStateManager(mapManager)
