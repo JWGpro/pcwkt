@@ -23,15 +23,23 @@ enum class Assets {
         }
     }
 
-    enum class Textures(val path: String) : Loadable {
-        INF_RED_1("$EXT/unit-assets/default/inf_red_1.png"),
-        INF_RED_2("$EXT/unit-assets/default/inf_red_2.png"),
-        INF_BLUE_1("$EXT/unit-assets/default/inf_blue_1.png"),
-        INF_BLUE_2("$EXT/unit-assets/default/inf_blue_2.png"),
-        APC_RED("$EXT/unit-assets/default/apc_red.png");
+    enum class Textures(val paths: Map<Team, String>) : Loadable {
+        INFANTRY(
+            mapOf(
+                Team.RED to "$EXT/unit-assets/default/inf_red_1.png",
+                Team.BLUE to "$EXT/unit-assets/default/inf_blue_1.png"
+            )
+        ),
+        APC(
+            mapOf(
+                Team.RED to "$EXT/unit-assets/default/apc_red.png",
+            )
+        );
 
         override fun load(assetManager: AssetManager) {
-            assetManager.load(path, Texture::class.java)
+            paths.values.forEach { path ->
+                assetManager.load(path, Texture::class.java)
+            }
         }
     }
 

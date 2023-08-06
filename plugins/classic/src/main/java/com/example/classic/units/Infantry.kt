@@ -9,7 +9,7 @@ class Infantry(x: Int, y: Int, team: Team) :
         x,
         y,
         team,
-        Assets.Textures.INF_RED_1,
+        Assets.Textures.INFANTRY.paths[team]!!,
         "Infantry",
         1000,
         3,

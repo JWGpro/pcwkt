@@ -99,6 +99,7 @@ class MapManager(
         setTerrain(12, 7, Terrains.PLAIN)
         setTerrain(13, 7, Terrains.PLAIN)
 
+        placeUnit(Infantry(13, 6, Team.BLUE))
         placeUnit(Infantry(13, 7, Team.RED))
         placeUnit(APC(12, 7, Team.RED))
     }

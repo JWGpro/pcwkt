@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.example.api.AStar
 import com.example.api.MapActorS
-import com.example.classic.Assets
 import com.example.classic.MapManager
 import com.example.classic.MovementTypes
 import com.example.classic.ServiceLocator
@@ -22,7 +21,7 @@ abstract class AUnit(
     x: Int,
     y: Int,
     var team: Team,
-    private val sprite: Assets.Textures,
+    private val spritePath: String,
     val name: String,
     val price: Int,
     val moveRange: Int,
@@ -36,7 +35,7 @@ abstract class AUnit(
     private val gameStage = ServiceLocator.gameStage
 
     private val actor =
-        MapActorS(TextureRegion(assetManager.get<Texture>(sprite.path)))
+        MapActorS(TextureRegion(assetManager.get<Texture>(spritePath)))
     private val maxHp = 100f
 
     var hp = maxHp

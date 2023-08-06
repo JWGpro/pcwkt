@@ -36,7 +36,6 @@ class ActionMenu(
     }
     private var moveCommand: MoveCommand? = null
 
-    // TODO: Command was used here for replays
     private enum class Actions(
         val title: String,
         val isShowable: (moveCommand: MoveCommand) -> Boolean,

@@ -9,7 +9,7 @@ class APC(x: Int, y: Int, team: Team) :
         x,
         y,
         team,
-        Assets.Textures.APC_RED,
+        Assets.Textures.APC.paths[team]!!,
         "APC",
         4000,
         6,
