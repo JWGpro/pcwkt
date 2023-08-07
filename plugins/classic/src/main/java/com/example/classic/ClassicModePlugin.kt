@@ -45,23 +45,25 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
             val replayManager = ReplayManager()
             val turnManager = TurnManager(replayManager)
             val cursor = Cursor(gameStage, assetManager)
-            mapManager = MapManager(tiledMap, cursor, turnManager)
+
+            val mapLoader = MapLoader()
+            mapManager = MapManager(
+                assetManager,
+                gameStage,
+                tiledMap,
+                cursor,
+                turnManager,
+                mapLoader.loadMap()
+            )
 
             // This needs to last indefinitely, so something needs to hold onto it
             val selectionStateManager = SelectionStateManager(mapManager)
-
             val actionMenu =
                 ActionMenu(uiStage, assetManager, mapManager, selectionStateManager, replayManager)
 
-            // TODO: This implementation makes the whole gameInit very confusing
-            ServiceLocator.gameStage = gameStage
-            ServiceLocator.assetManager = assetManager
             ServiceLocator.actionMenu = actionMenu
             ServiceLocator.mapManager = mapManager
             ServiceLocator.turnManager = turnManager
-
-            // All the below must come after the ServiceLocator init!
-            mapManager.loadMap()
         }
 
         override fun gameLoop(deltaTime: Float) {

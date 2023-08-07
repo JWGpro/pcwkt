@@ -1,10 +1,9 @@
 package com.example.classic.commands
 
-import com.example.classic.ServiceLocator
+import com.example.classic.TurnManager
 
-class CycleTurn : Command {
+class CycleTurn(turnManager: TurnManager) : Command {
 
-    private val turnManager = ServiceLocator.turnManager
     private val teamsPlaying = turnManager.teamsPlaying
 
     // Store states of living units for the undo()

@@ -1,15 +1,14 @@
 package com.example.classic.units
 
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.scenes.scene2d.Stage
 import com.example.api.AStar
 import com.example.api.MapActorS
 import com.example.classic.MapManager
-import com.example.classic.MovementTypes
-import com.example.classic.ServiceLocator
 import com.example.classic.Team
-import kotlin.reflect.KClass
 
 // "Unit" was too close to the Kotlin inbuilt
 // TODO: AUnit subclasses should be implemented in data. It would be an obvious, and probably by far
@@ -17,22 +16,21 @@ import kotlin.reflect.KClass
 //  to make a custom ruleset - not having to recompile the game into a separate mode to do this.
 //  ...Though this opens up the question of how much else ought to be data-driven.
 //  Client-side customisation of assets (and localisation strings) is yet another issue.
-abstract class AUnit(
+class AUnit(
     x: Int,
     y: Int,
     var team: Team,
-    private val spritePath: String,
-    val name: String,
-    val price: Int,
-    val moveRange: Int,
-    val moveType: MovementTypes,
-    val boardCap: Int = 0,
-    // TODO: Can't figure out the syntax for "subclass of AUnit".
-    val boardable: Array<KClass<*>>? = null
+    val type: AUnitType,
+    assetManager: AssetManager,
+    gameStage: Stage,
+    private val mapManager: MapManager,
 ) {
-    private val assetManager = ServiceLocator.assetManager
-    private val mapManager = ServiceLocator.mapManager
-    private val gameStage = ServiceLocator.gameStage
+    private val spritePath = type.spritePathMap[team]!!
+    val price = type.price
+    private val moveRange = type.moveRange
+    val moveType = type.movementType
+    private val boardCap = type.boardCap
+    private val boardable = type.boardable
 
     private val actor =
         MapActorS(TextureRegion(assetManager.get<Texture>(spritePath)))
@@ -41,20 +39,20 @@ abstract class AUnit(
     var hp = maxHp
     var gridRef: MapManager.GridReference
     var movesLeft = moveRange
-    val boardedUnits = mutableListOf<AUnit>()
+    private val boardedUnits = mutableListOf<AUnit>()
     var isOrderable = true
 
     init {
-        // TODO: UnitFactory?
         actor.setPosition(mapManager.long(x), mapManager.long(y))
         gameStage.addActor(actor)
 
         gridRef = mapManager.grid[x][y]
-        // MapManager.placeUnit() will set `gridRef.unit = this`
+        // FIXME: Why is this not warning about leaking `this` now?
+        gridRef.unit = this
     }
 
     fun canBoard(unit: AUnit): Boolean {
-        return boardable?.contains(unit::class) == true && boardedUnits.size < boardCap
+        return boardable?.contains(unit.type) == true && boardedUnits.size < boardCap
     }
 
     fun move(

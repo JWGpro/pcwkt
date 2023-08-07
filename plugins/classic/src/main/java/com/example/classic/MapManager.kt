@@ -1,5 +1,6 @@
 package com.example.classic
 
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.assets.loaders.resolvers.ExternalFileHandleResolver
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
@@ -7,13 +8,14 @@ import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer
 import com.badlogic.gdx.maps.tiled.TiledMapTileSet
 import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile
+import com.badlogic.gdx.scenes.scene2d.Stage
 import com.example.api.AStar
 import com.example.api.CellVector
 import com.example.api.Util.clampMax
 import com.example.api.Util.clampMin
-import com.example.classic.units.APC
+import com.example.classic.serial.GridRefSerial
 import com.example.classic.units.AUnit
-import com.example.classic.units.Infantry
+import com.example.classic.units.AUnitFactory
 import kotlin.math.abs
 import kotlin.math.floor
 
@@ -26,9 +28,12 @@ private const val CELL_SIZE = 16
 //  rendering code could still play online with older clients running the same gamemode.
 //  i.e. Spring's serialVersionUID.
 class MapManager(
+    assetManager: AssetManager,
+    gameStage: Stage,
     private val tiledMap: TiledMap,
     private val cursor: Cursor,
-    private val turnManager: TurnManager
+    private val turnManager: TurnManager,
+    private val serialGrid: List<List<GridRefSerial>>
 ) {
     class GridReference(
         vector: CellVector,
@@ -38,9 +43,8 @@ class MapManager(
         var rangeTileType: RangeTiles?
     ) : AStar.Node(vector, neighbours, null)
 
-    // TODO: These should come from the loaded map
-    private val mapW = 30
-    private val mapH = 20
+    private val mapW = serialGrid.size
+    private val mapH = serialGrid[0].size
     val grid = Array(mapW) {
         Array(mapH) {
             GridReference(
@@ -58,6 +62,8 @@ class MapManager(
     private val attackRangeLayer = newMapLayer("attackRange")
     private val rangesSet = newTileSet("ranges")
 
+    private val unitFactory = AUnitFactory(assetManager, gameStage, turnManager, this)
+
     init {
         // Generate tilesets
         Terrains.values().forEach { terrain ->
@@ -72,7 +78,11 @@ class MapManager(
         // Init grid and terrain
         forMap { x, y ->
             grid[x][y].vector = CellVector(x, y)
-            setTerrain(x, y, Terrains.SEA)
+            setTerrain(x, y, serialGrid[x][y].terrain)
+
+            serialGrid[x][y].unit?.let { unit ->
+                unitFactory.make(x, y, unit.team, unit.type)
+            }
 
             // I don't know why it doesn't pick up the MutableSet that I declared.
             val neighbours = grid[x][y].neighbours as MutableSet<AStar.Node>
@@ -82,26 +92,6 @@ class MapManager(
             neighbours.add(grid[clampMax(x + 1, mapW - 1)][y])
         }
 
-    }
-
-    fun loadMap() {
-        // TODO: Until we get all this from a map file
-        setTerrain(10, 5, Terrains.PLAIN)
-        setTerrain(11, 5, Terrains.PLAIN)
-        setTerrain(12, 5, Terrains.PLAIN)
-        setTerrain(13, 5, Terrains.PLAIN)
-        setTerrain(10, 6, Terrains.PLAIN)
-        setTerrain(11, 6, Terrains.MOUNTAIN)
-        setTerrain(12, 6, Terrains.MOUNTAIN)
-        setTerrain(13, 6, Terrains.MOUNTAIN)
-        setTerrain(10, 7, Terrains.PLAIN)
-        setTerrain(11, 7, Terrains.PLAIN)
-        setTerrain(12, 7, Terrains.PLAIN)
-        setTerrain(13, 7, Terrains.PLAIN)
-
-        placeUnit(Infantry(13, 6, Team.BLUE))
-        placeUnit(Infantry(13, 7, Team.RED))
-        placeUnit(APC(12, 7, Team.RED))
     }
 
     fun updateCursor(x: Float, y: Float) {
@@ -270,12 +260,6 @@ class MapManager(
                 fn(x, y)
             }
         }
-    }
-
-    private fun placeUnit(unit: AUnit) {
-        // When I did this in the AUnit init I was warned that I was leaking "this", which is fair.
-        unit.gridRef.unit = unit
-        turnManager.teamUnits[unit.team]?.add(unit)
     }
 
 }

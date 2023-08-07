@@ -15,7 +15,7 @@ class TurnManager(private val replayManager: ReplayManager) {
     }
 
     private fun nextTurn() {
-        val cycleTurn = CycleTurn()
+        val cycleTurn = CycleTurn(this)
         cycleTurn.execute()
         replayManager.append(cycleTurn)
     }
