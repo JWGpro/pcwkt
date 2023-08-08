@@ -11,6 +11,8 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
     compileOnly("org.pf4j:pf4j:${pf4jVersion}")
     api("com.badlogicgames.gdx:gdx:$gdxVersion")
+    // Needs to be here and not in a mode project or you get a runtime LinkageError
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
 }
 
 tasks.withType<Test>().configureEach {

@@ -3,6 +3,7 @@ package com.example.classic
 import com.badlogic.gdx.Gdx
 import com.example.classic.serial.AUnitSerial
 import com.example.classic.serial.GridRefSerial
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
