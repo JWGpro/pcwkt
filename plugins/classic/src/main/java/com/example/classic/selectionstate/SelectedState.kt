@@ -1,5 +1,6 @@
 package com.example.classic.selectionstate
 
+import com.example.api.AStar
 import com.example.classic.ServiceLocator
 import com.example.classic.units.AUnit
 
@@ -21,8 +22,10 @@ class SelectedState(
         if (unit.team == turnManager.teamsPlaying.current()
             && mapManager.isValidDestination(targetNode)
         ) {
+            val path = AStar.findPath(unit.gridRef, targetNode)
+
             stack.addLast(this)
-            return MovedState(stack, unit, targetNode)
+            return MovedState(stack, unit, path!!)
         }
 
         return this

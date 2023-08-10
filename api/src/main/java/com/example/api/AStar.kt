@@ -8,6 +8,7 @@ object AStar {
     //  rather than go the way of passing functions. I may change my mind on this.
     //  Yeah. At some point there'll be Paths with stale Nodes and you'll need to remember to
     //  discard them immediately. It's a mess.
+    // TODO: Yeah, this is causing replay bugs now.
     open class Node(var vector: CellVector, val neighbours: Set<Node>, var cost: Int?)
 
     class Path(val route: Array<Node>, val totalCost: Int)
@@ -34,8 +35,9 @@ object AStar {
                 val route = mutableListOf<Node>()
                 var traceNode: Node? = destination
 
-                while (traceNode != start) {
-                    traceNode?.let {
+                // Includes start node, which doesn't add to cost
+                while (traceNode != null) {
+                    traceNode.let {
                         route.add(it)
                     }
                     traceNode = cameFrom[traceNode]

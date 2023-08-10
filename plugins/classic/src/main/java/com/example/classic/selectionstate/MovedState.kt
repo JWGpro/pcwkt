@@ -1,6 +1,6 @@
 package com.example.classic.selectionstate
 
-import com.example.classic.MapManager
+import com.example.api.AStar
 import com.example.classic.ServiceLocator
 import com.example.classic.commands.MoveCommand
 import com.example.classic.units.AUnit
@@ -8,21 +8,20 @@ import com.example.classic.units.AUnit
 class MovedState(
     private val stack: ArrayDeque<SelectionState>,
     private val unit: AUnit,
-    private val targetNode: MapManager.GridReference
+    private val path: AStar.Path
 ) :
     SelectionState {
 
     private val mapManager = ServiceLocator.mapManager
     private val actionMenu = ServiceLocator.actionMenu
 
-    private val startingNode = unit.gridRef
     private var blocking = true
 
     init {
         // Starts off blocking
         mapManager.hideRanges()
-        val moveCommand = MoveCommand(unit, targetNode)
-        unit.move(targetNode, {
+        val moveCommand = MoveCommand(unit, path)
+        unit.move(path, {
             blocking = false
 
             // Defer to ActionMenu
@@ -43,7 +42,7 @@ class MovedState(
 
         actionMenu.clear()
         mapManager.showRanges()
-        unit.move(startingNode, {}, skipAnim = true)
+        unit.move(path, {}, skipAnim = true, reverse = true)
 
         return stack.removeLast()
     }

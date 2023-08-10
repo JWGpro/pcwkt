@@ -56,10 +56,13 @@ class AUnit(
     }
 
     fun move(
-        destination: MapManager.GridReference,
+        path: AStar.Path,
         after: () -> Unit,
-        skipAnim: Boolean = false
+        skipAnim: Boolean = false,
+        reverse: Boolean = false
     ) {
+        val destination = if (reverse) path.route.first() else path.route.last()
+
         if (destination == gridRef) {
             // No movement needed
             after()
@@ -72,21 +75,23 @@ class AUnit(
             actor.setPosition(x, y)
             after()
         } else {
-            val path = AStar.findPath(gridRef, destination)
-            path?.let {
-                val routeSteps = it.route.map { node ->
-                    val x = mapManager.long(node.vector.x)
-                    val y = mapManager.long(node.vector.y)
-                    MapActorS.RouteStep(x, y, 0.05f * (node.cost ?: 0))
-                }
-                actor.moveTo(routeSteps, after)
+            val routePreMap = if (reverse) path.route.dropLast(1).reversed() else path.route.drop(1)
+
+            val routeSteps = routePreMap.map { node ->
+                val x = mapManager.long(node.vector.x)
+                val y = mapManager.long(node.vector.y)
+                // TODO: Costs are also stale in replays, fix it now
+                MapActorS.RouteStep(x, y, 0.05f * (node.cost ?: 0))
             }
+
+            actor.moveTo(routeSteps, after)
         }
 
         // TODO:
 //        movesLeft -= cost
         killUnitRef()
-        gridRef = destination
+        // TODO: Is valid here but also seems a ridiculous assumption
+        gridRef = destination as MapManager.GridReference
         storeUnitRef()
     }
 
