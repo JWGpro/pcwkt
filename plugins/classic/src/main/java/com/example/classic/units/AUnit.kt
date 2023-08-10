@@ -90,8 +90,7 @@ class AUnit(
         // TODO:
 //        movesLeft -= cost
         killUnitRef()
-        // TODO: Is valid here but also seems a ridiculous assumption
-        gridRef = destination as MapManager.GridReference
+        gridRef = mapManager.grid[destination.vector.x][destination.vector.y]
         storeUnitRef()
     }
 

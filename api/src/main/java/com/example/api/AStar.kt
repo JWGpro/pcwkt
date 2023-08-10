@@ -8,12 +8,11 @@ object AStar {
     //  rather than go the way of passing functions. I may change my mind on this.
     //  Yeah. At some point there'll be Paths with stale Nodes and you'll need to remember to
     //  discard them immediately. It's a mess.
-    // TODO: Yeah, this is causing replay bugs now.
     open class Node(var vector: CellVector, val neighbours: Set<Node>, var cost: Int?)
 
     class Path(val route: Array<Node>, val totalCost: Int)
 
-    fun findPath(start: Node, destination: Node): Path? {
+    fun findPath(start: Node, destination: Node, savePath: Boolean = false): Path? {
         // Return null early if destination is unreachable.
         if (destination.cost == null) return null
 
@@ -32,13 +31,18 @@ object AStar {
 
             // If we've reached the destination, return the path and its cost. If not, keep working.
             if (current == destination) {
+                // Quit early; the caller just knows that a path exists
+                if (!savePath) return Path(arrayOf(), bestRouteCosts[current]!!)
+
                 val route = mutableListOf<Node>()
                 var traceNode: Node? = destination
 
                 // Includes start node, which doesn't add to cost
                 while (traceNode != null) {
                     traceNode.let {
-                        route.add(it)
+                        // Copy to mitigate stale data
+                        // This means the input and output nodes are no longer identical objects
+                        route.add(Node(it.vector, setOf(), it.cost))
                     }
                     traceNode = cameFrom[traceNode]
                 }

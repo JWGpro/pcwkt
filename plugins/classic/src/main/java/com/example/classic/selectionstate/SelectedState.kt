@@ -22,7 +22,7 @@ class SelectedState(
         if (unit.team == turnManager.teamsPlaying.current()
             && mapManager.isValidDestination(targetNode)
         ) {
-            val path = AStar.findPath(unit.gridRef, targetNode)
+            val path = AStar.findPath(unit.gridRef, targetNode, savePath = true)
 
             stack.addLast(this)
             return MovedState(stack, unit, path!!)
