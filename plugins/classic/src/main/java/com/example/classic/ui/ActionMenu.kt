@@ -11,16 +11,20 @@ import com.example.classic.Assets
 import com.example.classic.MapManager
 import com.example.classic.ReplayManager
 import com.example.classic.commands.MoveCommand
+import com.example.classic.commands.action.BoardCommand
 import com.example.classic.commands.action.UnitActionCommand
 import com.example.classic.commands.action.WaitCommand
+import com.example.classic.selectionstate.ActingState
+import com.example.classic.selectionstate.MovedState
 import com.example.classic.selectionstate.SelectionStateManager
 
 class ActionMenu(
-    uiStage: Stage,
+    private val uiStage: Stage,
     assetManager: AssetManager,
     private val mapManager: MapManager,
     private val selectionStateManager: SelectionStateManager,
-    private val replayManager: ReplayManager
+    private val replayManager: ReplayManager,
+    private val unloadMenu: UnloadMenu
 ) {
 
     // Front-loading everything. Trying to avoid dynamic allocation
@@ -34,24 +38,76 @@ class ActionMenu(
         })
         button
     }
+    private var movedState: MovedState? = null
     private var moveCommand: MoveCommand? = null
+
+    init {
+        uiStage.addActor(actionTable)
+        actionTable.setFillParent(true)
+        actionTable.top()
+        actionTable.left()
+        actionTable.pad(10f)
+    }
 
     private enum class Actions(
         val title: String,
-        val isShowable: (moveCommand: MoveCommand) -> Boolean,
+        val isShowable: (actionMenu: ActionMenu, moveCommand: MoveCommand) -> Boolean,
         val action: (actionMenu: ActionMenu) -> Unit
     ) {
         // The actions appear in this order.
-        BOARD("Board", {
-            // This is mutually exclusive with WAIT. You can't WAIT on a transport.
-            false
-        }, {}),
-        CAPTURE("Capture", { false }, {}),
-        ATTACK("Attack", { false }, {}),
-        UNLOAD("Unload", { false }, {}),
-        HOLD("Hold", { false }, {}),
-        WAIT("Wait", { moveCommand ->
-            !BOARD.isShowable(moveCommand)
+
+        BOARD("Board", { actionMenu, moveCommand ->
+            // This is mutually exclusive with WAIT. You can't WAIT (or HOLD) on a transport.
+            actionMenu.mapManager.isBoardable(moveCommand.path.route.last())
+        }, { actionMenu ->
+
+            val destination = actionMenu.moveCommand!!.path.route.last()
+            val transport =
+                actionMenu.mapManager.grid[destination.vector.x][destination.vector.y].unit
+
+            val boardCommand = BoardCommand(actionMenu.moveCommand!!.unit, transport!!)
+            boardCommand.execute()
+
+            actionMenu.replayManager.append(
+                UnitActionCommand(actionMenu.moveCommand!!, boardCommand)
+            )
+
+            // Finish this move
+            actionMenu.finishMove()
+        }),
+
+        CAPTURE("Capture", { _, _ -> false }, {}),
+
+        ATTACK("Attack", { _, _ -> false }, {}),
+
+        UNLOAD("Unload", { _, moveCommand ->
+            // TODO: If there are boarded units which can't disembark, show the button, but disabled
+            //  Mobius Front '83 has similar textual feedback for unavailable actions.
+            moveCommand.unit.hasUnloadableUnits()
+        }, { actionMenu ->
+
+            val actingState = actionMenu.toActingState()
+            actionMenu.unloadMenu.show(actionMenu.moveCommand!!.unit, actingState)
+
+        }),
+
+        HOLD("Hold", { actionMenu, moveCommand ->
+            // TODO: For now, only transports can Hold, as a power move.
+            //  Hold is actually relevant for all units, but only really for Supply and Join
+            //  optimisation, so I think it's just confusing and tedious.
+            !BOARD.isShowable(actionMenu, moveCommand) &&
+                    moveCommand.unit.movesLeft > 0 && moveCommand.unit.type.boardable != null
+        }, { actionMenu ->
+
+            actionMenu.replayManager.append(
+                actionMenu.moveCommand!!
+            )
+            // Finish this move
+            actionMenu.finishMove()
+        }),
+
+        WAIT("Wait", { actionMenu, moveCommand ->
+            !HOLD.isShowable(actionMenu, moveCommand) && !BOARD.isShowable(actionMenu, moveCommand)
         }, { actionMenu ->
 
             val waitCommand = WaitCommand(actionMenu.moveCommand!!.unit)
@@ -62,28 +118,19 @@ class ActionMenu(
             )
 
             // Finish this move
-            actionMenu.clear()
-            actionMenu.mapManager.clearRanges()
-
-            actionMenu.selectionStateManager.defaultState()
+            actionMenu.finishMove()
         }),
+
     }
 
-    init {
-        uiStage.addActor(actionTable)
-        actionTable.setFillParent(true)
-        actionTable.top()
-        actionTable.left()
-        actionTable.pad(10f)
-    }
-
-    fun show(moveCommand: MoveCommand) {
+    fun show(movedState: MovedState, moveCommand: MoveCommand) {
+        this.movedState = movedState
         this.moveCommand = moveCommand
 
         // Evaluate potential actions
         Actions.values().forEach { action ->
             val button = actionButtons[action]
-            if (action.isShowable(moveCommand)) {
+            if (action.isShowable(this, moveCommand)) {
                 actionTable.add(button)
                 actionTable.row()
             }
@@ -91,7 +138,27 @@ class ActionMenu(
     }
 
     fun clear() {
-        this.moveCommand = null
+        // Let's see if we need to null anything.
+//        this.movedState = null
+//        this.moveCommand = null
         actionTable.clearChildren()
+    }
+
+    private fun finishMove() {
+        clear()
+        mapManager.clearRanges()
+
+        selectionStateManager.defaultState()
+    }
+
+    private fun toActingState(): ActingState {
+        val stack = movedState!!.stack
+        stack.addLast(movedState!!)
+
+        // WARNING: This will clear() ActionMenu on init!
+        val actingState = ActingState(stack, unloadMenu, movedState!!, moveCommand!!)
+
+        selectionStateManager.state = actingState
+        return actingState
     }
 }

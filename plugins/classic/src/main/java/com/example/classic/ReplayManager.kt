@@ -16,6 +16,10 @@ class ReplayManager {
         replay.append(command)
     }
 
+    fun removeLast() {
+        replay.removeLast()
+    }
+
     private fun replayBackward() {
         // TODO: Make sure state is DEFAULT, and set it to REPLAY.
         //  (An old Lua comment. Not sure how to manage this with the SelectionStates.)

@@ -193,11 +193,11 @@ class MapManager(
     }
 
     fun displayRanges(unit: AUnit) {
-        val moveVectors = manRange(unit.gridRef.vector, 0, unit.movesLeft)
+        val moveVectors = manRange(unit.gridRef!!.vector, 0, unit.movesLeft)
 
         moveVectors.forEach { vec ->
             setCosts(unit)
-            val path = AStar.findPath(unit.gridRef, grid[vec.x][vec.y])
+            val path = AStar.findPath(unit.gridRef!!, grid[vec.x][vec.y])
             // TODO: Incorporate movesLeft into AStar.findPath().
             if (path != null && path.totalCost <= unit.movesLeft) {
                 val destination = grid[vec.x][vec.y]
@@ -210,8 +210,8 @@ class MapManager(
                 } else if (destination.unit?.team == unit.team) { // TODO: or allies
                     // 2: Cell is occupied by a boardable unit.
                     if (destination.unit?.canBoard(unit) == true) {
-                        cell.tile = rangesSet.getTile(RangeTiles.MOVE.ordinal)
-                        grid[vec.x][vec.y].rangeTileType = RangeTiles.MOVE
+                        cell.tile = rangesSet.getTile(RangeTiles.BOARD.ordinal)
+                        grid[vec.x][vec.y].rangeTileType = RangeTiles.BOARD
                     }
                     // 3: Allow ONLY PASSAGE for units of the same or allied teams.
                     else {
@@ -236,8 +236,14 @@ class MapManager(
         }
     }
 
-    fun isValidDestination(destination: GridReference): Boolean {
-        return setOf(RangeTiles.MOVE).contains(destination.rangeTileType)
+    fun isValidDestination(destination: AStar.Node): Boolean {
+        val gridRef = grid[destination.vector.x][destination.vector.y]
+        return setOf(RangeTiles.MOVE, RangeTiles.BOARD).contains(gridRef.rangeTileType)
+    }
+
+    fun isBoardable(destination: AStar.Node): Boolean {
+        val gridRef = grid[destination.vector.x][destination.vector.y]
+        return setOf(RangeTiles.BOARD).contains(gridRef.rangeTileType)
     }
 
     fun hideRanges() {

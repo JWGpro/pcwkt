@@ -10,8 +10,8 @@ class MoveCommand(
     val path: AStar.Path
 ) : Command {
 
-    // Set by UnitActionCommand
-    lateinit var after: () -> Unit
+    // Normally set by UnitActionCommand
+    var after: () -> Unit = {}
 
     override fun execute() {
         unit.move(path, after)

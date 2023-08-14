@@ -5,7 +5,7 @@ import com.example.classic.InputHandler
 import com.example.classic.MapManager
 
 class SelectionStateManager(private val mapManager: MapManager) {
-    private var state: SelectionState = DefaultState(mapManager)
+    var state: SelectionState = DefaultState(mapManager)
 
     init {
         InputHandler.addListener(Controls.SELECT_NEXT) { state = state.advance() }

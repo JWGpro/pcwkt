@@ -33,26 +33,60 @@ class AUnit(
     private val boardable = type.boardable
 
     private val actor =
-        MapActorS(TextureRegion(assetManager.get<Texture>(spritePath)))
+        MapActorS(gameStage, TextureRegion(assetManager.get<Texture>(spritePath)))
     private val maxHp = 100f
 
     var hp = maxHp
-    var gridRef: MapManager.GridReference
+        private set
+    var gridRef: MapManager.GridReference?
+        private set
     var movesLeft = moveRange
-    private val boardedUnits = mutableListOf<AUnit>()
+    val boardedUnits = mutableListOf<AUnit>()
     var isOrderable = true
+        private set
+    var transport: AUnit? = null
+        private set
 
     init {
         actor.setPosition(mapManager.long(x), mapManager.long(y))
         gameStage.addActor(actor)
 
         gridRef = mapManager.grid[x][y]
-        // FIXME: Why is this not warning about leaking `this` now?
-        gridRef.unit = this
+        gridRef!!.unit = this
     }
 
     fun canBoard(unit: AUnit): Boolean {
         return boardable?.contains(unit.type) == true && boardedUnits.size < boardCap
+    }
+
+    fun hasUnloadableUnits(): Boolean {
+        boardedUnits.forEach { unit ->
+            // If the unit can move, and can disembark where it is
+            if (unit.movesLeft > 0 && this.gridRef!!.terrain.moveCosts[unit.moveType] != null) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun board(transport: AUnit) {
+        gridRef = null
+        this.transport = transport
+        actor.hide()
+
+        transport.boardedUnits.add(this)
+    }
+
+    fun disembark() {
+        transport!!.boardedUnits.removeLast()
+
+        gridRef = transport!!.gridRef
+        transport = null
+
+        val x = mapManager.long(gridRef!!.vector.x)
+        val y = mapManager.long(gridRef!!.vector.y)
+        actor.setPosition(x, y)
+        actor.unhide()
     }
 
     fun move(
@@ -80,15 +114,14 @@ class AUnit(
             val routeSteps = routePreMap.map { node ->
                 val x = mapManager.long(node.vector.x)
                 val y = mapManager.long(node.vector.y)
-                // TODO: Costs are also stale in replays, fix it now
                 MapActorS.RouteStep(x, y, 0.05f * (node.cost ?: 0))
             }
 
             actor.moveTo(routeSteps, after)
         }
 
-        // TODO:
-//        movesLeft -= cost
+        movesLeft -= if (reverse) -path.totalCost else path.totalCost
+
         killUnitRef()
         gridRef = mapManager.grid[destination.vector.x][destination.vector.y]
         storeUnitRef()
@@ -117,11 +150,11 @@ class AUnit(
     private fun killUnitRef() {
         // Only wipe the unit ref if it did in fact refer to this unit. That is, a normal move.
         // This will not be the case if this unit is moving out of a transport.
-        if (gridRef.unit == this) gridRef.unit = null
+        if (gridRef!!.unit == this) gridRef!!.unit = null
     }
 
     private fun storeUnitRef() {
         // Similarly, don't set the unit ref if this unit is moving onto a transport.
-        if (gridRef.unit == null) gridRef.unit = this
+        if (gridRef!!.unit == null) gridRef!!.unit = this
     }
 }

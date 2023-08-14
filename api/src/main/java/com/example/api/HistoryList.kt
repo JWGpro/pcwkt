@@ -10,6 +10,11 @@ class HistoryList<T> {
         historyPosition++
     }
 
+    fun removeLast() {
+        history.removeLast()
+        historyPosition--
+    }
+
     fun goBackward(): T? {
         if (historyPosition == 0) return null
 

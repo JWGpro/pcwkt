@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.example.api.GameMode
 import com.example.classic.selectionstate.SelectionStateManager
 import com.example.classic.ui.ActionMenu
+import com.example.classic.ui.UnloadMenu
 import org.pf4j.Extension
 import org.pf4j.Plugin
 import org.pf4j.PluginWrapper
@@ -58,11 +59,20 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
 
             // This needs to last indefinitely, so something needs to hold onto it
             val selectionStateManager = SelectionStateManager(mapManager)
+            val unloadMenu = UnloadMenu(uiStage, assetManager, selectionStateManager, replayManager)
             val actionMenu =
-                ActionMenu(uiStage, assetManager, mapManager, selectionStateManager, replayManager)
+                ActionMenu(
+                    uiStage,
+                    assetManager,
+                    mapManager,
+                    selectionStateManager,
+                    replayManager,
+                    unloadMenu
+                )
 
-            ServiceLocator.actionMenu = actionMenu
             ServiceLocator.mapManager = mapManager
+            ServiceLocator.actionMenu = actionMenu
+            ServiceLocator.unloadMenu = unloadMenu
             ServiceLocator.turnManager = turnManager
         }
 

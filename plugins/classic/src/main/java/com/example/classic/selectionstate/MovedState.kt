@@ -6,7 +6,7 @@ import com.example.classic.commands.MoveCommand
 import com.example.classic.units.AUnit
 
 class MovedState(
-    private val stack: ArrayDeque<SelectionState>,
+    val stack: ArrayDeque<SelectionState>,
     private val unit: AUnit,
     private val path: AStar.Path
 ) :
@@ -25,7 +25,7 @@ class MovedState(
             blocking = false
 
             // Defer to ActionMenu
-            actionMenu.show(moveCommand)
+            actionMenu.show(this, moveCommand)
         })
     }
 

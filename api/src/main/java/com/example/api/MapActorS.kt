@@ -3,12 +3,13 @@ package com.example.api
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction
 import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction
 
 // "Static" or non-animated
-class MapActorS(private val region: TextureRegion) : Actor() {
+class MapActorS(private val thisStage: Stage, private val region: TextureRegion) : Actor() {
 
     private var alpha = 1.0f
 
@@ -30,6 +31,15 @@ class MapActorS(private val region: TextureRegion) : Actor() {
         })
 
         this.addAction(sequenceAction)
+    }
+
+    fun hide() {
+        this.remove()
+    }
+
+    fun unhide() {
+        // Ends up on top of everything where it wasn't before, but that shouldn't be a problem.
+        thisStage.addActor(this)
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
