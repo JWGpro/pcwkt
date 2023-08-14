@@ -40,7 +40,6 @@ class MapManager(
         neighbours: MutableSet<AStar.Node>,
         var unit: AUnit?,
         var terrain: Terrains,
-        var rangeTileType: RangeTiles?
     ) : AStar.Node(vector, neighbours, null)
 
     private val mapW = serialGrid.size
@@ -52,7 +51,6 @@ class MapManager(
                 mutableSetOf(),
                 null,
                 Terrains.SEA,
-                null,
             )
         }
     }
@@ -204,19 +202,17 @@ class MapManager(
                 val cell = moveRangeLayer.getCell(vec.x, vec.y)
                 // Destination conditions:
                 // 1: Cell is empty, or occupied by this unit.
-                if (destination.unit == null || destination.unit == unit) {
+                // TODO: Maybe move these out into their own functions.
+                if (isMoveDestination(destination, unit)) {
                     cell.tile = rangesSet.getTile(RangeTiles.MOVE.ordinal)
-                    grid[vec.x][vec.y].rangeTileType = RangeTiles.MOVE
                 } else if (destination.unit?.team == unit.team) { // TODO: or allies
                     // 2: Cell is occupied by a boardable unit.
-                    if (destination.unit?.canBoard(unit) == true) {
+                    if (isBoardDestination(destination, unit)) {
                         cell.tile = rangesSet.getTile(RangeTiles.BOARD.ordinal)
-                        grid[vec.x][vec.y].rangeTileType = RangeTiles.BOARD
                     }
                     // 3: Allow ONLY PASSAGE for units of the same or allied teams.
                     else {
                         cell.tile = rangesSet.getTile(RangeTiles.SELECT.ordinal)
-                        grid[vec.x][vec.y].rangeTileType = RangeTiles.SELECT
                     }
 
                 }
@@ -232,32 +228,24 @@ class MapManager(
         forMap { x, y ->
             val cell = moveRangeLayer.getCell(x, y)
             cell.tile = null
-            grid[x][y].rangeTileType = null
         }
     }
 
-    fun isValidDestination(destination: AStar.Node): Boolean {
-        val gridRef = grid[destination.vector.x][destination.vector.y]
-        return setOf(RangeTiles.MOVE, RangeTiles.BOARD).contains(gridRef.rangeTileType)
+    private fun isMoveDestination(destination: GridReference, unit: AUnit): Boolean {
+        return destination.unit == null || destination.unit == unit
     }
 
-    fun isBoardable(destination: AStar.Node): Boolean {
-        val gridRef = grid[destination.vector.x][destination.vector.y]
-        return setOf(RangeTiles.BOARD).contains(gridRef.rangeTileType)
+    fun isBoardDestination(destination: GridReference, unit: AUnit): Boolean {
+        return destination.unit?.canBoard(unit) == true
     }
 
-    fun hideRanges() {
-        forMap { x, y ->
-            val cell = moveRangeLayer.getCell(x, y)
-            cell.tile = null
-        }
+    fun isValidDestination(destination: GridReference, unit: AUnit): Boolean {
+        return isMoveDestination(destination, unit) || isBoardDestination(destination, unit)
     }
 
-    fun showRanges() {
-        forMap { x, y ->
-            val cell = moveRangeLayer.getCell(x, y)
-            cell.tile = grid[x][y].rangeTileType?.let { rangesSet.getTile(it.ordinal) }
-        }
+    fun toGridRef(node: AStar.Node): GridReference {
+        // grid is public so this is just convenience
+        return grid[node.vector.x][node.vector.y]
     }
 
     private inline fun forMap(fn: (x: Int, y: Int) -> Unit) {

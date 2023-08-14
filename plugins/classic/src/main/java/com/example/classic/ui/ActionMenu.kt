@@ -58,7 +58,8 @@ class ActionMenu(
 
         BOARD("Board", { actionMenu, moveCommand ->
             // This is mutually exclusive with WAIT. You can't WAIT (or HOLD) on a transport.
-            actionMenu.mapManager.isBoardable(moveCommand.path.route.last())
+            val destination = actionMenu.mapManager.toGridRef(moveCommand.path.route.last())
+            actionMenu.mapManager.isBoardDestination(destination, moveCommand.unit)
         }, { actionMenu ->
 
             val destination = actionMenu.moveCommand!!.path.route.last()

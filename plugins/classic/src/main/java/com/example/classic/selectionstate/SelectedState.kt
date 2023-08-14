@@ -20,7 +20,7 @@ open class SelectedState(
         val targetNode = mapManager.getCursorNode()
 
         if (unit.team == turnManager.teamsPlaying.current()
-            && mapManager.isValidDestination(targetNode)
+            && mapManager.isValidDestination(targetNode, unit)
         ) {
             val path = AStar.findPath(unit.gridRef!!, targetNode, savePath = true)
 

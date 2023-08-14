@@ -19,7 +19,7 @@ class MovedState(
 
     init {
         // Starts off blocking
-        mapManager.hideRanges()
+        mapManager.clearRanges()
         val moveCommand = MoveCommand(unit, path)
         unit.move(path, {
             blocking = false
@@ -41,8 +41,8 @@ class MovedState(
         if (blocking) return this
 
         actionMenu.clear()
-        mapManager.showRanges()
         unit.move(path, {}, skipAnim = true, reverse = true)
+        mapManager.displayRanges(unit)
 
         return stack.removeLast()
     }
