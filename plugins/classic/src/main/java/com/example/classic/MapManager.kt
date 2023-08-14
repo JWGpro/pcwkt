@@ -182,7 +182,7 @@ class MapManager(
 
             // TODO: Check for allies
             // An enemy will prevent passage.
-            if (occupier != null && occupier.team != turnManager.teamsPlaying.current()) {
+            if (occupier != null && occupier.team != unit.team) {
                 grid[x][y].cost = null
             } else {
                 grid[x][y].cost = grid[x][y].terrain.moveCosts[unit.moveType]
