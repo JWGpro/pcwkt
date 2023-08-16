@@ -9,6 +9,7 @@ import com.example.api.AStar
 import com.example.api.MapActorS
 import com.example.classic.MapManager
 import com.example.classic.Team
+import kotlin.math.ceil
 
 // "Unit" was too close to the Kotlin inbuilt
 // TODO: AUnit subclasses should be implemented in data. It would be an obvious, and probably by far
@@ -87,6 +88,11 @@ class AUnit(
         val y = mapManager.long(gridRef!!.vector.y)
         actor.setPosition(x, y)
         actor.unhide()
+    }
+
+    fun getStrength(): Int {
+        // Round up HP to ints from 1-10 for display or strength calculations (attack/capture...).
+        return ceil((hp / maxHp) * 10).toInt()
     }
 
     fun move(

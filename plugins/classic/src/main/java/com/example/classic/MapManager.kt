@@ -14,6 +14,11 @@ import com.example.api.CellVector
 import com.example.api.Util.clampMax
 import com.example.api.Util.clampMin
 import com.example.classic.serial.GridRefSerial
+import com.example.classic.serial.TerrainSerial
+import com.example.classic.terrains.Property
+import com.example.classic.terrains.Terrain
+import com.example.classic.terrains.TerrainType
+import com.example.classic.terrains.TilePath
 import com.example.classic.units.AUnit
 import com.example.classic.units.AUnitFactory
 import kotlin.math.abs
@@ -39,7 +44,7 @@ class MapManager(
         vector: CellVector,
         neighbours: MutableSet<AStar.Node>,
         var unit: AUnit?,
-        var terrain: Terrains,
+        var terrain: Terrain,
     ) : AStar.Node(vector, neighbours, null)
 
     private val mapW = serialGrid.size
@@ -50,7 +55,7 @@ class MapManager(
                 CellVector(0, 0),
                 mutableSetOf(),
                 null,
-                Terrains.SEA,
+                TerrainType.SEA,
             )
         }
     }
@@ -64,9 +69,9 @@ class MapManager(
 
     init {
         // Generate tilesets
-        Terrains.values().forEach { terrain ->
-            val tile = newStaticTile("$EXT/terrain-assets/default/${terrain.path}")
-            terrainSet.putTile(terrain.ordinal, tile)
+        TilePath.values().forEach { terrainPath ->
+            val tile = newStaticTile("$EXT/terrain-assets/default/${terrainPath.path}")
+            terrainSet.putTile(terrainPath.ordinal, tile)
         }
         RangeTiles.values().forEach { rangeTile ->
             val tile = newStaticTile("$EXT/ui-assets/default/${rangeTile.path}")
@@ -143,9 +148,27 @@ class MapManager(
         return StaticTiledMapTile(TextureRegion(Texture(fh)))
     }
 
-    private fun setTerrain(x: Int, y: Int, terrain: Terrains) {
-        grid[x][y].terrain = terrain
-        terrainLayer.getCell(x, y).tile = terrainSet.getTile(terrain.ordinal)
+    private fun setTerrain(x: Int, y: Int, terrain: TerrainSerial) {
+
+        if (terrain.type.isProperty) {
+            grid[x][y].terrain = Property(grid[x][y], terrain.type, terrain.team!!, this)
+
+            terrainLayer.getCell(x, y).tile =
+                terrainSet.getTile(terrain.type.paths[terrain.team]!!.ordinal)
+        } else {
+            grid[x][y].terrain = terrain.type
+
+            terrainLayer.getCell(x, y).tile =
+                terrainSet.getTile(terrain.type.paths[Team.NEUTRAL]!!.ordinal)
+        }
+
+    }
+
+    fun changePropertyTeam(property: Property, team: Team) {
+        val gridRef = property.gridRef
+
+        terrainLayer.getCell(gridRef.vector.x, gridRef.vector.y).tile =
+            terrainSet.getTile(property.type.paths[team]!!.ordinal)
     }
 
     private fun manRange(start: CellVector, minRange: Int, maxRange: Int): Collection<CellVector> {

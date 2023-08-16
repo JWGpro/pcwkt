@@ -3,14 +3,21 @@ package com.example.classic
 import com.badlogic.gdx.Gdx
 import com.example.classic.serial.AUnitSerial
 import com.example.classic.serial.GridRefSerial
+import com.example.classic.serial.TerrainSerial
+import com.example.classic.terrains.Property
+import com.example.classic.terrains.TerrainType
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+@OptIn(ExperimentalSerializationApi::class)
+val format = Json { explicitNulls = false }
+
 class MapLoader {
     fun loadMap(): List<List<GridRefSerial>> {
         val mapJson = Gdx.files.external("pcwkt/maps/map.json").readString()
-        return Json.decodeFromString(mapJson)
+        return format.decodeFromString(mapJson)
     }
 
     fun saveMap(grid: Array<Array<MapManager.GridReference>>) {
@@ -21,10 +28,18 @@ class MapLoader {
             column.map { cell ->
                 val unit =
                     if (cell.unit == null) null else AUnitSerial(cell.unit!!.type, cell.unit!!.team)
-                GridRefSerial(unit, cell.terrain)
+
+                // TODO: no
+                if (cell.terrain.isProperty) {
+                    val terrain = cell.terrain as Property
+                    GridRefSerial(unit, TerrainSerial(terrain.type, terrain.team))
+                } else {
+                    val terrain = cell.terrain as TerrainType
+                    GridRefSerial(unit, TerrainSerial(terrain, null))
+                }
             }
         }
         Gdx.files.external("pcwkt/maps/map.json")
-            .writeString(Json.encodeToString(gridSerial), false)
+            .writeString(format.encodeToString(gridSerial), false)
     }
 }

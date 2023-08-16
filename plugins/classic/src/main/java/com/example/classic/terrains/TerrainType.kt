@@ -1,14 +1,22 @@
-package com.example.classic
+package com.example.classic.terrains
 
-enum class Terrains(
-    val title: String,
-    val path: String,
-    val defence: Int,
-    val moveCosts: Map<MovementTypes, Int>
-) {
+import com.example.classic.MovementTypes
+import com.example.classic.Team
+import com.example.classic.units.AUnitType
+import com.example.classic.units.GROUND_UNITS
+
+enum class TerrainType(
+    override val title: String,
+    override val paths: Map<Team, TilePath>,
+    override val defence: Int,
+    override val moveCosts: Map<MovementTypes, Int>,
+    override val isProperty: Boolean = false,
+    override val repairsUnits: Array<AUnitType>? = null,
+    override val unitsDeployable: Array<AUnitType>? = null,
+) : Terrain {
     SEA(
         "Sea",
-        "sea.png",
+        mapOf(Team.NEUTRAL to TilePath.SEA),
         0,
         mapOf(
             MovementTypes.AIR to 1,
@@ -18,7 +26,7 @@ enum class Terrains(
     ),
     REEF(
         "Reef",
-        "reef.png",
+        mapOf(Team.NEUTRAL to TilePath.REEF),
         0,
         mapOf(
             MovementTypes.AIR to 1,
@@ -28,7 +36,7 @@ enum class Terrains(
     ),
     ROAD(
         "Road",
-        "road.png",
+        mapOf(Team.NEUTRAL to TilePath.ROAD),
         0,
         mapOf(
             MovementTypes.INF to 1,
@@ -40,7 +48,7 @@ enum class Terrains(
     ),
     PLAIN(
         "Plain",
-        "plain.png",
+        mapOf(Team.NEUTRAL to TilePath.PLAIN),
         1,
         mapOf(
             MovementTypes.INF to 1,
@@ -52,7 +60,7 @@ enum class Terrains(
     ),
     FOREST(
         "Forest",
-        "forest.png",
+        mapOf(Team.NEUTRAL to TilePath.FOREST),
         2,
         mapOf(
             MovementTypes.INF to 1,
@@ -64,7 +72,7 @@ enum class Terrains(
     ),
     MOUNTAIN(
         "Mountain",
-        "mountain.png",
+        mapOf(Team.NEUTRAL to TilePath.MOUNTAIN),
         4,
         mapOf(
             MovementTypes.INF to 2,
@@ -74,7 +82,7 @@ enum class Terrains(
     ),
     RIVER(
         "River",
-        "river.png",
+        mapOf(Team.NEUTRAL to TilePath.RIVER),
         0,
         mapOf(
             MovementTypes.INF to 2,
@@ -84,7 +92,7 @@ enum class Terrains(
     ),
     SHOAL(
         "Shoal",
-        "shoal.png",
+        mapOf(Team.NEUTRAL to TilePath.SHOAL),
         0,
         mapOf(
             MovementTypes.INF to 1,
@@ -94,5 +102,24 @@ enum class Terrains(
             MovementTypes.AIR to 1,
             MovementTypes.LANDER to 1
         )
+    ),
+    FACTORY(
+        "Factory",
+        mapOf(
+            Team.NEUTRAL to TilePath.FACTORY_NEUTRAL,
+            Team.RED to TilePath.FACTORY_RED,
+            Team.BLUE to TilePath.FACTORY_BLUE,
+        ),
+        3,
+        mapOf(
+            MovementTypes.INF to 1,
+            MovementTypes.MECH to 1,
+            MovementTypes.TYRE to 2,
+            MovementTypes.TRACK to 1,
+            MovementTypes.AIR to 1
+        ),
+        isProperty = true,
+        repairsUnits = GROUND_UNITS,
+        unitsDeployable = GROUND_UNITS
     )
 }

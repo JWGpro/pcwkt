@@ -12,11 +12,13 @@ import com.example.classic.MapManager
 import com.example.classic.ReplayManager
 import com.example.classic.commands.MoveCommand
 import com.example.classic.commands.action.BoardCommand
+import com.example.classic.commands.action.CaptureCommand
 import com.example.classic.commands.action.UnitActionCommand
 import com.example.classic.commands.action.WaitCommand
 import com.example.classic.selectionstate.ActingState
 import com.example.classic.selectionstate.MovedState
 import com.example.classic.selectionstate.SelectionStateManager
+import com.example.classic.terrains.Property
 
 class ActionMenu(
     private val uiStage: Stage,
@@ -77,7 +79,34 @@ class ActionMenu(
             actionMenu.finishMove()
         }),
 
-        CAPTURE("Capture", { _, _ -> false }, {}),
+        CAPTURE("Capture", { actionMenu, moveCommand ->
+            val unit = moveCommand.unit
+            val destination = actionMenu.mapManager.toGridRef(moveCommand.path.route.last())
+            val terrain = destination.terrain
+
+            // TODO: allies
+            terrain.isProperty
+                    && (terrain as Property).team != unit.team
+                    && unit.type.canCapture
+                    && !BOARD.isShowable(actionMenu, moveCommand)
+        }, { actionMenu ->
+
+            val destination = actionMenu.moveCommand!!.path.route.last()
+            val unit = actionMenu.moveCommand!!.unit
+
+            val property =
+                actionMenu.mapManager.grid[destination.vector.x][destination.vector.y].terrain as Property
+
+            val captureCommand = CaptureCommand(unit, property)
+            captureCommand.execute()
+
+            actionMenu.replayManager.append(
+                UnitActionCommand(actionMenu.moveCommand!!, captureCommand)
+            )
+
+            // Finish this move
+            actionMenu.finishMove()
+        }),
 
         ATTACK("Attack", { _, _ -> false }, {}),
 
