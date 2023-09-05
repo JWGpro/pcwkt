@@ -15,9 +15,10 @@ import com.example.classic.commands.action.BoardCommand
 import com.example.classic.commands.action.CaptureCommand
 import com.example.classic.commands.action.UnitActionCommand
 import com.example.classic.commands.action.WaitCommand
-import com.example.classic.selectionstate.ActingState
 import com.example.classic.selectionstate.MovedState
 import com.example.classic.selectionstate.SelectionStateManager
+import com.example.classic.selectionstate.TargetingState
+import com.example.classic.selectionstate.UnloadingState
 import com.example.classic.terrains.Property
 
 class ActionMenu(
@@ -26,7 +27,8 @@ class ActionMenu(
     private val mapManager: MapManager,
     private val selectionStateManager: SelectionStateManager,
     private val replayManager: ReplayManager,
-    private val unloadMenu: UnloadMenu
+    private val unloadMenu: UnloadMenu,
+    private val targetingUI: TargetingUI
 ) {
 
     // Front-loading everything. Trying to avoid dynamic allocation
@@ -108,7 +110,17 @@ class ActionMenu(
             actionMenu.finishMove()
         }),
 
-        ATTACK("Attack", { _, _ -> false }, {}),
+        ATTACK("Attack", { actionMenu, moveCommand ->
+            val destination = actionMenu.mapManager.toGridRef(moveCommand.path.route.last())
+
+            destination.targets.size > 0
+                    && !BOARD.isShowable(actionMenu, moveCommand)
+        }, { actionMenu ->
+
+            // Show the TargetingUI
+            actionMenu.toTargetingState()
+
+        }),
 
         UNLOAD("Unload", { _, moveCommand ->
             // TODO: If there are boarded units which can't disembark, show the button, but disabled
@@ -116,7 +128,7 @@ class ActionMenu(
             moveCommand.unit.hasUnloadableUnits()
         }, { actionMenu ->
 
-            val actingState = actionMenu.toActingState()
+            val actingState = actionMenu.toUnloadingState()
             actionMenu.unloadMenu.show(actionMenu.moveCommand!!.unit, actingState)
 
         }),
@@ -181,14 +193,31 @@ class ActionMenu(
         selectionStateManager.defaultState()
     }
 
-    private fun toActingState(): ActingState {
+    private fun toUnloadingState(): UnloadingState {
         val stack = movedState!!.stack
         stack.addLast(movedState!!)
 
         // WARNING: This will clear() ActionMenu on init!
-        val actingState = ActingState(stack, unloadMenu, movedState!!, moveCommand!!)
+        val unloadingState = UnloadingState(stack, unloadMenu, movedState!!, moveCommand!!)
 
-        selectionStateManager.state = actingState
-        return actingState
+        selectionStateManager.state = unloadingState
+        return unloadingState
+    }
+
+    private fun toTargetingState() {
+        val stack = movedState!!.stack
+        stack.addLast(movedState!!)
+
+        // WARNING: This will clear() ActionMenu on init!
+        val targetingState = TargetingState(
+            stack,
+            movedState!!,
+            moveCommand!!,
+            replayManager,
+            targetingUI
+        )
+
+        selectionStateManager.state = targetingState
+        targetingUI.show()
     }
 }

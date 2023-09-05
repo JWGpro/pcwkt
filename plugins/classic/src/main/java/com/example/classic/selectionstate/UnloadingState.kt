@@ -4,7 +4,7 @@ import com.example.classic.ServiceLocator
 import com.example.classic.commands.MoveCommand
 import com.example.classic.ui.UnloadMenu
 
-class ActingState(
+class UnloadingState(
     val stack: ArrayDeque<SelectionState>,
     private val unloadMenu: UnloadMenu,
     private val movedState: MovedState,
@@ -18,7 +18,7 @@ class ActingState(
     }
 
     override fun advance(): SelectionState {
-        // Attack/Unload/whatever menu is handling this
+        // UnloadMenu is handling this
         return this
     }
 
@@ -26,7 +26,6 @@ class ActingState(
         // Show action menu again
         actionMenu.show(movedState, moveCommand)
 
-        // TODO: And targetMenu
         unloadMenu.clear()
 
         return stack.removeLast()

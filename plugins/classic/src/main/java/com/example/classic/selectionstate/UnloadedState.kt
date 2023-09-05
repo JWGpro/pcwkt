@@ -11,7 +11,7 @@ class UnloadedState(
     private val replayManager: ReplayManager,
     // UnloadCommand should have been executed; it needs to happen before the SelectedState init
     private val unloadCommand: UnloadCommand,
-    private val actingState: ActingState
+    private val unloadingState: UnloadingState
 ) : SelectedState(stack, cargo) {
 
     private val unloadMenu = ServiceLocator.unloadMenu
@@ -29,7 +29,7 @@ class UnloadedState(
     override fun undo(): SelectionState {
         unloadCommand.undo()
         replayManager.removeLast()
-        unloadMenu.show(cargo.transport!!, actingState)
+        unloadMenu.show(cargo.transport!!, unloadingState)
 
         return super.undo()
     }

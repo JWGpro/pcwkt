@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.example.api.AStar
+import com.example.api.CellVector
 import com.example.api.MapActorS
 import com.example.classic.MapManager
 import com.example.classic.Team
@@ -27,11 +28,6 @@ class AUnit(
     private val mapManager: MapManager,
 ) {
     private val spritePath = type.spritePathMap[team]!!
-    val price = type.price
-    private val moveRange = type.moveRange
-    val moveType = type.movementType
-    private val boardCap = type.boardCap
-    private val boardable = type.boardable
 
     private val actor =
         MapActorS(gameStage, TextureRegion(assetManager.get<Texture>(spritePath)))
@@ -41,7 +37,7 @@ class AUnit(
         private set
     var gridRef: MapManager.GridReference?
         private set
-    var movesLeft = moveRange
+    var movesLeft = type.moveRange
     val boardedUnits = mutableListOf<AUnit>()
     var isOrderable = true
         private set
@@ -57,13 +53,13 @@ class AUnit(
     }
 
     fun canBoard(unit: AUnit): Boolean {
-        return boardable?.contains(unit.type) == true && boardedUnits.size < boardCap
+        return type.boardable?.contains(unit.type) == true && boardedUnits.size < type.boardCap
     }
 
     fun hasUnloadableUnits(): Boolean {
         boardedUnits.forEach { unit ->
             // If the unit can move, and can disembark where it is
-            if (unit.movesLeft > 0 && this.gridRef!!.terrain.moveCosts[unit.moveType] != null) {
+            if (unit.movesLeft > 0 && this.gridRef!!.terrain.moveCosts[unit.type.movementType] != null) {
                 return true
             }
         }
@@ -90,9 +86,111 @@ class AUnit(
         actor.unhide()
     }
 
+    /**
+     * Round up HP to an Int from 1-10 for display or strength calculations (attack/capture...).
+     */
     fun getStrength(): Int {
-        // Round up HP to ints from 1-10 for display or strength calculations (attack/capture...).
         return ceil((hp / maxHp) * 10).toInt()
+    }
+
+    /**
+     * @return Damage directly applicable to a unit's HP.
+     */
+    private fun calculateDamage(defender: AUnit, weapon: WeaponType): Float {
+        val attackerStrength = getStrength() / 10f
+        val defenderStrength = defender.getStrength() / 10f
+
+        val damage = weapon.damageMap[defender.type] ?: return 0f
+
+        // TODO: Ignore air unit terrain defence
+        val terrainBonus = defender.gridRef!!.terrain.defence
+        val defencePenalty = (1f - (0.1f * terrainBonus * defenderStrength))
+
+        return (attackerStrength * damage * defencePenalty)
+    }
+
+    /**
+     * @return Whether the defender survived the attack.
+     */
+    private fun attack(defender: AUnit, weapon: WeaponType): Boolean {
+        val damage = calculateDamage(defender, weapon)
+        defender.takeDamage(damage)
+
+        println("${defender.team}, ${defender.hp}")
+        return !defender.isDead()
+    }
+
+    fun battle(defender: AUnit, weapon: WeaponType) {
+        val targetIsAlive = attack(defender, weapon)
+
+        // Counterattack
+        if (targetIsAlive) {
+            val counterWeapons = validWeapons(defender.gridRef!!.vector, this, false)
+            if (counterWeapons.isNotEmpty()) {
+                defender.attack(this, counterWeapons.first())
+            }
+        }
+    }
+
+    private fun takeDamage(damage: Float) {
+        setHp(hp - damage)
+        // TODO: SFX/VFX, flash
+    }
+
+    fun validWeapons(
+        attackerPosition: CellVector,
+        target: AUnit,
+        indirectAllowed: Boolean
+    ): List<WeaponType> {
+        val distance = attackerPosition.manDist(target.gridRef!!.vector)
+
+        return type.getWeapons()?.filter { weapon ->
+            (weapon.minRange <= distance && distance <= weapon.maxRange)
+                    && weapon.damageMap.containsKey(target.type)
+                    && (weapon.isDirect || indirectAllowed)
+        } ?: emptyList()
+    }
+
+    /**
+     * Intended to be used with, for example, HPs stored in Commands.
+     */
+    fun setHp(amount: Float) {
+        // TODO: Maybe there should be some separate layer for Command interactions. Just feels
+        //  messy right now having everything together. In C# I guess that's partial classes.
+        val wasDead = isDead()
+        hp = amount
+
+        if (wasDead && !isDead()) {
+            undie()
+        } else if (!wasDead && isDead()) {
+            die()
+        }
+    }
+
+    private fun die() {
+        if (transport == null) {
+            killUnitRef()
+            actor.hide()
+        }
+        if (type.boardable != null) {
+            // Kill everything on board when dying.
+            boardedUnits.forEach { unit ->
+                unit.die()
+            }
+        }
+    }
+
+    private fun undie() {
+        if (transport == null) {
+            storeUnitRef()
+            actor.unhide()
+        }
+        if (type.boardable != null) {
+            // Kill everything on board when dying.
+            boardedUnits.forEach { unit ->
+                unit.undie()
+            }
+        }
     }
 
     fun move(
@@ -145,7 +243,7 @@ class AUnit(
     }
 
     fun restore() {
-        movesLeft = moveRange
+        movesLeft = type.moveRange
         unwait()
     }
 

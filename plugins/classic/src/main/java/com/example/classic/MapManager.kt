@@ -45,6 +45,7 @@ class MapManager(
         neighbours: MutableSet<AStar.Node>,
         var unit: AUnit?,
         var terrain: Terrain,
+        var targets: MutableSet<AUnit>
     ) : AStar.Node(vector, neighbours, null)
 
     private val mapW = serialGrid.size
@@ -56,6 +57,7 @@ class MapManager(
                 mutableSetOf(),
                 null,
                 TerrainType.SEA,
+                mutableSetOf()
             )
         }
     }
@@ -208,12 +210,14 @@ class MapManager(
             if (occupier != null && occupier.team != unit.team) {
                 grid[x][y].cost = null
             } else {
-                grid[x][y].cost = grid[x][y].terrain.moveCosts[unit.moveType]
+                grid[x][y].cost = grid[x][y].terrain.moveCosts[unit.type.movementType]
             }
         }
     }
 
     fun displayRanges(unit: AUnit) {
+        val destinationNodes = mutableSetOf<GridReference>()
+
         val moveVectors = manRange(unit.gridRef!!.vector, 0, unit.movesLeft)
 
         moveVectors.forEach { vec ->
@@ -225,9 +229,9 @@ class MapManager(
                 val cell = moveRangeLayer.getCell(vec.x, vec.y)
                 // Destination conditions:
                 // 1: Cell is empty, or occupied by this unit.
-                // TODO: Maybe move these out into their own functions.
                 if (isMoveDestination(destination, unit)) {
                     cell.tile = rangesSet.getTile(RangeTiles.MOVE.ordinal)
+                    destinationNodes.add(destination)
                 } else if (destination.unit?.team == unit.team) { // TODO: or allies
                     // 2: Cell is occupied by a boardable unit.
                     if (isBoardDestination(destination, unit)) {
@@ -241,6 +245,41 @@ class MapManager(
                 }
             }
         }
+
+        displayTargets(unit, destinationNodes, unit.gridRef!!)
+    }
+
+    fun displayTargets(
+        unit: AUnit,
+        destinationNodes: MutableSet<GridReference>,
+        startingNode: AStar.Node
+    ) {
+        unit.type.getWeapons()?.forEach { weapon ->
+            destinationNodes.forEach { destination ->
+                val indirectAllowed = startingNode.vector == destination.vector
+
+                if (weapon.isDirect || indirectAllowed) {
+                    val targets = mutableSetOf<AUnit>()
+                    destination.targets = targets
+
+                    val attackVectors =
+                        manRange(destination.vector, weapon.minRange, weapon.maxRange)
+                    attackVectors.forEach { vector ->
+                        val target = grid[vector.x][vector.y].unit
+
+                        if (target != null
+                            && target.team != unit.team  // TODO: or ally
+                            && weapon.damageMap.containsKey(target.type)
+                        ) {
+                            targets.add(target)
+
+                            val cell = attackRangeLayer.getCell(vector.x, vector.y)
+                            cell.tile = rangesSet.getTile(RangeTiles.ATTACK.ordinal)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun getCursorNode(): GridReference {
@@ -249,8 +288,10 @@ class MapManager(
 
     fun clearRanges() {
         forMap { x, y ->
-            val cell = moveRangeLayer.getCell(x, y)
-            cell.tile = null
+            val moveCell = moveRangeLayer.getCell(x, y)
+            moveCell.tile = null
+            val attackCell = attackRangeLayer.getCell(x, y)
+            attackCell.tile = null
         }
     }
 

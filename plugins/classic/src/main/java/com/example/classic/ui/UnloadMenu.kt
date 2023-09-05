@@ -12,9 +12,9 @@ import com.example.api.CyclingArray
 import com.example.classic.Assets
 import com.example.classic.ReplayManager
 import com.example.classic.commands.action.UnloadCommand
-import com.example.classic.selectionstate.ActingState
 import com.example.classic.selectionstate.SelectionStateManager
 import com.example.classic.selectionstate.UnloadedState
+import com.example.classic.selectionstate.UnloadingState
 import com.example.classic.units.AUnit
 
 // TODO: Unlikely to work this way at all. Mobius Front '83 had a good UI for this.
@@ -35,7 +35,7 @@ class UnloadMenu(
     private val confirmButton =
         TextButton("Unload", assetManager.get<Skin>(Assets.Skins.DEFAULT.path))
 
-    private var actingState: ActingState? = null
+    private var unloadingState: UnloadingState? = null
     private var outunit: AUnit? = null
     private var outunits: CyclingArray<AUnit>? = null
 
@@ -59,8 +59,8 @@ class UnloadMenu(
         })
     }
 
-    fun show(transport: AUnit, actingState: ActingState) {
-        this.actingState = actingState
+    fun show(transport: AUnit, unloadingState: UnloadingState) {
+        this.unloadingState = unloadingState
         // yes dynamic allocation ok
         outunits = CyclingArray(transport.boardedUnits.toTypedArray())
         update()
@@ -84,14 +84,14 @@ class UnloadMenu(
     }
 
     private fun toUnloadedState() {
-        val stack = actingState!!.stack
-        stack.addLast(actingState!!)
+        val stack = unloadingState!!.stack
+        stack.addLast(unloadingState!!)
 
         val unloadCommand = UnloadCommand(outunit!!)
         unloadCommand.execute()
         // WARNING: This will clear() UnloadMenu on init!
         val unloadedState =
-            UnloadedState(stack, outunit!!, replayManager, unloadCommand, actingState!!)
+            UnloadedState(stack, outunit!!, replayManager, unloadCommand, unloadingState!!)
 
         selectionStateManager.state = unloadedState
     }
