@@ -40,6 +40,8 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
             uiCamera: OrthographicCamera
         ) {
             this.gameCamera = gameCamera
+            // TODO: Center map properly
+            gameCamera.translate(-400f, -200f)
             gameCamera.zoom = 0.5f
 
             Assets.loadAll(assetManager)
