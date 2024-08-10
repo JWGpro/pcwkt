@@ -37,6 +37,7 @@ abstract class Menu(
     }
 
     override fun resize(width: Int, height: Int) {
+        stage.viewport.update(width, height, false)
     }
 
     override fun pause() {

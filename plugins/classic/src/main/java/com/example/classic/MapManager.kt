@@ -283,7 +283,13 @@ class MapManager(
     }
 
     fun getCursorNode(): GridReference {
-        return grid[short(cursor.actor.x)][short(cursor.actor.y)]
+        val cursorX = short(cursor.actor.x)
+        val cursorY = short(cursor.actor.y)
+
+        // TODO 2024-08-10: I wrote this a year ago and now I don't know why. Let's go with it for now
+        if (cursorX < 0 || cursorX > mapW - 1 || cursorY < 0 || cursorY > mapH - 1) return grid[0][0]
+
+        return grid[cursorX][cursorY]
     }
 
     fun clearRanges() {

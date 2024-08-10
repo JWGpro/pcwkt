@@ -9,6 +9,7 @@ object DesktopLauncher {
     fun main(arg: Array<String>) {
         val config = Lwjgl3ApplicationConfiguration()
         config.setForegroundFPS(60)
+        config.setWindowedMode(1280, 720)
         config.setTitle("PCWKT")
         Lwjgl3Application(PCWKTGame(), config)
     }

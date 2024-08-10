@@ -106,13 +106,15 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
         gameMode.gameLoop(delta)
 
         gameCamera.update()
+
+        gameStage.viewport.apply()
         tiledMapRenderer.setView(gameCamera)
         tiledMapRenderer.render()
-
         gameStage.act(delta)
-        uiStage.act(delta)
-
         gameStage.draw()
+
+        uiStage.viewport.apply()
+        uiStage.act(delta)
         uiStage.draw()
     }
 
