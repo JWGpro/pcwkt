@@ -21,6 +21,7 @@ import com.example.classic.terrains.TerrainType
 import com.example.classic.terrains.TilePath
 import com.example.classic.units.AUnit
 import com.example.classic.units.AUnitFactory
+import com.example.classic.units.AUnitType
 import kotlin.math.abs
 import kotlin.math.floor
 
@@ -97,6 +98,10 @@ class MapManager(
             neighbours.add(grid[clampMax(x + 1, mapW - 1)][y])
         }
 
+    }
+
+    fun makeUnit(vector: CellVector, team: Team, unitType: AUnitType) {
+        unitFactory.make(vector.x, vector.y, team, unitType)
     }
 
     fun updateCursor(x: Float, y: Float) {

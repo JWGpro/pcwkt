@@ -18,6 +18,7 @@ interface WeaponType {
 }
 
 enum class AUnitType(
+    val title: String,
     val spritePathMap: Map<Team, String>,
     val price: Int,
     val moveRange: Int,
@@ -29,6 +30,7 @@ enum class AUnitType(
     val getWeapons: () -> Array<WeaponType>? = { null }
 ) {
     INFANTRY(
+        "Infantry",
         Assets.Textures.INFANTRY.paths,
         1000,
         3,
@@ -50,6 +52,7 @@ enum class AUnitType(
         }
     ),
     APC(
+        "APC",
         Assets.Textures.APC.paths,
         4000,
         6,

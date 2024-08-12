@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.example.api.GameMode
 import com.example.classic.selectionstate.SelectionStateManager
 import com.example.classic.ui.ActionMenu
+import com.example.classic.ui.DeployMenu
 import com.example.classic.ui.TargetingUI
 import com.example.classic.ui.UnloadMenu
 import org.pf4j.Extension
@@ -79,6 +80,11 @@ class ClassicModePlugin(wrapper: PluginWrapper) : Plugin(wrapper) {
             ServiceLocator.actionMenu = actionMenu
             ServiceLocator.unloadMenu = unloadMenu
             ServiceLocator.turnManager = turnManager
+
+            val deployMenu = DeployMenu(uiStage, assetManager)
+            ServiceLocator.deployMenu = deployMenu
+
+            selectionStateManager.defaultState()
         }
 
         override fun gameLoop(deltaTime: Float) {
