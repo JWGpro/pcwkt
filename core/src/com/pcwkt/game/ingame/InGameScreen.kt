@@ -18,9 +18,15 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.example.api.GameMode
+import org.pf4j.ClassLoadingStrategy
 import org.pf4j.CompoundPluginDescriptorFinder
+import org.pf4j.DefaultPluginLoader
 import org.pf4j.DefaultPluginManager
 import org.pf4j.ManifestPluginDescriptorFinder
+import org.pf4j.PluginClassLoader
+import org.pf4j.PluginDescriptor
+import org.pf4j.PluginLoader
+import org.pf4j.PluginManager
 import org.pf4j.PluginWrapper
 import java.nio.file.Path
 
@@ -42,10 +48,30 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
 
     private var gameMode: GameMode
 
-    private class PluginManager(importPaths: List<Path>) : DefaultPluginManager(importPaths) {
+    private class CustomPluginLoader(pluginManager: PluginManager) : DefaultPluginLoader(
+        pluginManager
+    ) {
+        override fun createPluginClassLoader(
+            pluginPath: Path,
+            pluginDescriptor: PluginDescriptor
+        ): PluginClassLoader {
+            return PluginClassLoader(
+                pluginManager,
+                pluginDescriptor,
+                this::class.java.classLoader,
+                ClassLoadingStrategy.APD
+            )
+        }
+    }
+
+    private class CustomPluginManager(importPaths: List<Path>) : DefaultPluginManager(importPaths) {
         override fun createPluginDescriptorFinder(): CompoundPluginDescriptorFinder {
             return CompoundPluginDescriptorFinder()
                 .add(ManifestPluginDescriptorFinder())
+        }
+
+        override fun createPluginLoader(): PluginLoader {
+            return CustomPluginLoader(this)
         }
     }
 
@@ -57,7 +83,7 @@ class InGameScreen(game: Game, parentMode: String, childMode: String) : Screen, 
         println("plugins dir: $pluginsDir")
 
         // create the plugin manager
-        val pluginManager = PluginManager(listOf(Path.of(pluginsDir)))
+        val pluginManager = CustomPluginManager(listOf(Path.of(pluginsDir)))
         // load the plugins
         pluginManager.loadPlugins()
         // start (active/resolved) the plugins

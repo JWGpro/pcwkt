@@ -26,9 +26,6 @@ sourceSets {
         java {
             srcDirs("src/")
         }
-        resources {
-            srcDirs("../assets")
-        }
     }
 }
 
@@ -72,7 +69,7 @@ tasks.register<Jar>("dist") {
         attributes["Main-Class"] = mainClassName
     }
     dependsOn(configurations.runtimeClasspath)
-    from (
+    from(
         configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
     )
     with(tasks.jar.get() as CopySpec)
