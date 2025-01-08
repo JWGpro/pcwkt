@@ -10,3 +10,9 @@ Since the gamemode logic exists as a plugin, that has to be built before running
 which will pick it up from the build directory.
 Therefore set up your run configuration to run a Gradle build before `desktop:run` (or the Android
 equivalent).
+
+# License
+
+Licensed under the GNU Affero General Public License 3 or any later version at your choice.
+
+SPDX-License-Identifier: AGPL-3.0-or-later
